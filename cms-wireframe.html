@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>CMS Website — Wireframe v1</title>
+<style>
+  :root{
+    --line:#8a8a8a;
+    --line-soft:#c9c9c9;
+    --bg:#f5f5f5;
+    --panel:#ffffff;
+    --text:#333;
+    --muted:#888;
+    --accent:#555;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--text);}
+  .topbar{background:#222;color:#fff;padding:10px 16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;}
+  .topbar h1{font-size:15px;margin:0;font-weight:600;}
+  .device-toggle button, .nav button{
+    background:#333;color:#fff;border:1px solid #555;padding:6px 10px;margin-left:4px;cursor:pointer;font-size:12px;
+  }
+  .device-toggle button.active, .nav button.active{background:#e0e0e0;color:#111;font-weight:bold;}
+  .nav{background:#ddd;padding:8px 16px;display:flex;flex-wrap:wrap;gap:4px;border-bottom:1px solid var(--line);}
+  .nav button{background:#fff;color:#222;border:1px solid var(--line-soft);}
+  .stage{display:flex;justify-content:center;padding:24px;}
+  .frame{background:var(--panel);border:1px solid var(--line);transition:width .2s;overflow:hidden;}
+  .frame.desktop{width:1000px;}
+  .frame.mobile{width:375px;}
+  .screen{display:none;}
+  .screen.active{display:block;}
+
+  /* generic wireframe primitives */
+  .box{border:1px dashed var(--line);padding:8px;margin:8px;color:var(--muted);font-size:12px;}
+  .label{position:relative;top:-4px;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;}
+  .btn{display:inline-block;border:1px solid var(--line);padding:6px 12px;font-size:12px;text-align:center;background:#eee;}
+  .row{display:flex;gap:8px;flex-wrap:wrap;}
+  .col{flex:1;min-width:0;}
+  .header{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line);padding:10px 14px;}
+  .logo{font-weight:bold;font-size:16px;border:1px dashed var(--line);padding:4px 8px;}
+  .navlinks{display:flex;gap:10px;font-size:12px;}
+  .navlinks span{border:1px dashed var(--line-soft);padding:3px 8px;}
+  .ad{border:2px dashed #b33;color:#b33;text-align:center;padding:10px;font-size:11px;margin:8px;}
+  .avatar{width:28px;height:28px;border-radius:50%;border:1px dashed var(--line);display:inline-block;text-align:center;line-height:28px;font-size:10px;}
+  .card{border:1px solid var(--line-soft);margin:8px;padding:10px;}
+  .card h4{margin:0 0 4px;font-size:13px;}
+  .card p{margin:0;font-size:11px;color:var(--muted);}
+  .thumb{width:100%;height:80px;border:1px dashed var(--line);display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--muted);margin-bottom:6px;}
+  .thumb.small{height:50px;}
+  .section-title{font-size:13px;font-weight:bold;margin:14px 8px 4px;padding-bottom:4px;border-bottom:1px solid #ccc;}
+  input,textarea{width:100%;font-size:11px;padding:6px;border:1px solid var(--line-soft);margin-top:2px;}
+  .footer{border-top:1px solid var(--line);padding:10px 14px;font-size:10px;color:var(--muted);text-align:center;}
+  .lock{font-size:9px;color:#b33;border:1px dashed #b33;padding:1px 4px;margin-left:4px;}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 8px;}
+  .frame.mobile .grid2{grid-template-columns:1fr;}
+  .frame.mobile .row{flex-direction:column;}
+  .frame.mobile .navlinks{display:none;}
+  .frame.mobile .header::after{content:"☰";border:1px dashed var(--line);padding:2px 8px;font-size:14px;}
+  .tag{font-size:9px;border:1px solid var(--line-soft);padding:1px 5px;margin-right:3px;color:var(--muted);}
+  .qa{border-left:3px solid var(--line-soft);margin:8px;padding:6px 10px;}
+  .qa .meta{font-size:10px;color:var(--muted);}
+  .modbar{background:#fff3f3;border:1px dashed #b33;padding:6px;font-size:11px;margin:8px;}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <h1>CMS Website — Wireframe (v1 draft)</h1>
+  <div class="device-toggle">
+    <button id="btnDesktop" class="active" onclick="setDevice('desktop')">Desktop</button>
+    <button id="btnMobile" onclick="setDevice('mobile')">Mobile</button>
+  </div>
+</div>
+
+<div class="nav" id="navBar"></div>
+
+<div class="stage">
+  <div class="frame desktop" id="frame">
+
+    <!-- 1. LOGIN -->
+    <div class="screen" id="screen-login">
+      <div class="header"><div class="logo">SITE LOGO</div></div>
+      <div class="box" style="max-width:320px;margin:60px auto;text-align:center;">
+        <div class="label">Sign in</div>
+        <p style="font-size:11px;color:var(--muted)">No individual signup — continue with an existing account</p>
+        <div class="btn" style="margin:8px 0;">Continue with Google</div>
+        <div class="btn" style="margin:8px 0;">Continue with Facebook</div>
+        <div class="btn" style="margin:8px 0;">Continue with Microsoft</div>
+        <p style="font-size:9px;color:var(--muted);">By continuing you agree to Terms &amp; Content Policy</p>
+      </div>
+    </div>
+
+    <!-- 2. HOME / FEED -->
+    <div class="screen" id="screen-home">
+      <div class="header">
+        <div class="logo">SITE LOGO</div>
+        <div class="navlinks"><span>Home</span><span>Topics</span><span>My Portfolio</span><span>Submit</span></div>
+        <div class="avatar">You</div>
+      </div>
+      <div class="ad">AD SLOT — LEADERBOARD BANNER (728×90)</div>
+      <div class="section-title">Trending Topics</div>
+      <div class="row" style="padding:0 8px;">
+        <div class="card col"><div class="thumb small">topic icon</div><h4>Car Reviews</h4><p>142 discussions</p></div>
+        <div class="card col"><div class="thumb small">topic icon</div><h4>Home Cooking</h4><p>89 discussions</p></div>
+        <div class="card col"><div class="thumb small">topic icon</div><h4>Tech &amp; Gadgets</h4><p>310 discussions</p></div>
+      </div>
+      <div class="section-title">Latest Blogs</div>
+      <div class="grid2">
+        <div class="card"><div class="thumb">cover image</div><h4>Blog title goes here</h4><p>by Author · Topic: Car Reviews · 3 comments</p></div>
+        <div class="card"><div class="thumb">cover image</div><h4>Another blog title</h4><p>by Author · Topic: Tech · 12 comments</p></div>
+        <div class="ad" style="grid-column:1/-1;">AD SLOT — IN-FEED (300×250 or responsive)</div>
+        <div class="card"><div class="thumb">cover image</div><h4>Third blog title</h4><p>by Author · Topic: Cooking · 5 comments</p></div>
+        <div class="card"><div class="thumb">cover image</div><h4>Fourth blog title</h4><p>by Author · Topic: Car Reviews · 1 comment</p></div>
+      </div>
+      <div class="footer">Footer links · About · Contact · Terms</div>
+    </div>
+
+    <!-- 3. TOPIC PAGE (Q&A / Review style) -->
+    <div class="screen" id="screen-topic">
+      <div class="header">
+        <div class="logo">SITE LOGO</div>
+        <div class="navlinks"><span>Home</span><span>Topics</span><span>My Portfolio</span><span>Submit</span></div>
+        <div class="avatar">You</div>
+      </div>
+      <div class="box"><div class="label">Topic</div><h4 style="margin:2px 0;">Car Reviews — 2024 Model Comparisons</h4><p>Topic owner: Jane D. · Followers: 1.2k</p></div>
+      <div class="row" style="padding:0 8px;">
+        <div class="btn">+ Ask a question</div>
+        <div class="btn">+ Post a review</div>
+        <div class="btn">Sort: Most recent ▾</div>
+      </div>
+      <div class="qa">
+        <div class="tag">Question</div><b>How reliable is the hybrid engine after 100k miles?</b>
+        <div class="meta">Asked by user123 · 4 answers · [Topic owner: edit / delete]</div>
+      </div>
+      <div class="qa">
+        <div class="tag">Review</div><b>★★★★☆ — Great fuel economy, cramped back seat</b>
+        <div class="meta">Reviewed by user456 · 8 comments · [Topic owner: edit / delete]</div>
+      </div>
+      <div class="qa">
+        <div class="tag">Question</div><b>Best trim for city driving?</b>
+        <div class="meta">Asked by user789 · 2 answers · [Topic owner: edit / delete]</div>
+      </div>
+      <div class="ad">AD SLOT — SIDEBAR / IN-THREAD</div>
+    </div>
+
+    <!-- 4. BLOG DETAIL + COMMENTS -->
+    <div class="screen" id="screen-blog">
+      <div class="header">
+        <div class="logo">SITE LOGO</div>
+        <div class="navlinks"><span>Home</span><span>Topics</span><span>My Portfolio</span><span>Submit</span></div>
+        <div class="avatar">You</div>
+      </div>
+      <div class="box"><div class="label">Blog</div>
+        <h4 style="margin:2px 0;">Blog Title — Full Article Heading</h4>
+        <p>by Author Name · Topic: Car Reviews · Posted date &nbsp; [Owner: Edit] [Owner: Delete]</p>
+      </div>
+      <div class="thumb" style="margin:0 8px;height:160px;">hero image</div>
+      <div class="box">Body paragraph placeholder text... body paragraph placeholder text... image / embed block...</div>
+      <div class="ad">AD SLOT — MID-ARTICLE</div>
+      <div class="section-title">Comments (24)</div>
+      <div class="box"><textarea placeholder="Add a comment..." rows="2"></textarea><div class="btn" style="margin-top:6px;">Post comment</div></div>
+      <div class="qa"><b>Commenter A:</b> Comment text placeholder <div class="meta">2h ago · Reply · [Owner/Admin: delete]</div></div>
+      <div class="qa"><b>Commenter B:</b> Comment text placeholder <div class="meta">5h ago · Reply · [Owner/Admin: delete]</div></div>
+    </div>
+
+    <!-- 5. SUBMIT / EDIT FORM -->
+    <div class="screen" id="screen-submit">
+      <div class="header">
+        <div class="logo">SITE LOGO</div>
+        <div class="navlinks"><span>Home</span><span>Topics</span><span>My Portfolio</span><span>Submit</span></div>
+        <div class="avatar">You</div>
+      </div>
+      <div class="section-title">Submit New Topic / Blog</div>
+      <div class="box">
+        <div class="label">Type</div>
+        <div class="row"><div class="btn">Topic</div><div class="btn">Blog Post</div></div>
+        <div class="label" style="margin-top:10px;">Title</div><input placeholder="Enter title">
+        <div class="label">Category</div><input placeholder="e.g. Car Reviews">
+        <div class="label">Content</div><textarea rows="5" placeholder="Write your content..."></textarea>
+        <div class="label">Cover Image (JPEG)</div><input type="file">
+        <div class="row" style="margin-top:10px;"><div class="btn">Save Draft</div><div class="btn">Publish</div></div>
+      </div>
+    </div>
+
+    <!-- 6. PERSONAL PORTFOLIO (owner-only editable) -->
+    <div class="screen" id="screen-portfolio">
+      <div class="header">
+        <div class="logo">SITE LOGO</div>
+        <div class="navlinks"><span>Home</span><span>Topics</span><span>My Portfolio</span><span>Submit</span></div>
+        <div class="avatar">You</div>
+      </div>
+      <div class="box">
+        <div class="label">Profile <span class="lock">read-only to visitors</span></div>
+        <div class="row">
+          <div class="avatar" style="width:60px;height:60px;line-height:60px;">Photo</div>
+          <div class="col">
+            <h4 style="margin:4px 0;">Your Name — Portfolio &amp; Accomplishments</h4>
+            <div class="row">
+              <span class="tag">LinkedIn URL <span class="lock">edit: owner only</span></span>
+              <span class="tag">GitHub URL <span class="lock">edit: owner only</span></span>
+              <span class="tag">Certificate credentials <span class="lock">edit: owner only</span></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-title">Documents</div>
+      <div class="row" style="padding:0 8px;">
+        <div class="card col"><div class="thumb small">PDF icon</div><h4>Resume.pdf</h4><p>[Owner: Replace] [Owner: Delete]</p></div>
+        <div class="card col"><div class="thumb small">PDF icon</div><h4>Cover Letter.pdf</h4><p>[Owner: Replace] [Owner: Delete]</p></div>
+        <div class="card col"><div class="thumb small">PDF icon</div><h4>Project Portfolio.pdf</h4><p>[Owner: Replace] [Owner: Delete]</p></div>
+      </div>
+      <div class="box" style="font-size:10px;">Upload placeholder — accepted formats: PDF, JPEG only [Owner: Add new document]</div>
+
+      <div class="section-title">Projects <span class="lock" style="margin-left:6px;">edit: owner only</span></div>
+      <div class="grid2">
+        <div class="card">
+          <div class="row">
+            <div class="thumb small col">screen — laptop</div>
+            <div class="thumb small col">screen — mobile</div>
+          </div>
+          <h4>Project One Title</h4>
+          <p>Short description placeholder</p>
+          <div class="row"><div class="btn">Owner: Edit</div><div class="btn">Owner: Delete</div></div>
+        </div>
+        <div class="card">
+          <div class="row">
+            <div class="thumb small col">screen — laptop</div>
+            <div class="thumb small col">screen — mobile</div>
+          </div>
+          <h4>Project Two Title</h4>
+          <p>Short description placeholder</p>
+          <div class="row"><div class="btn">Owner: Edit</div><div class="btn">Owner: Delete</div></div>
+        </div>
+      </div>
+      <div class="box"><div class="btn">+ Owner: Add New Project (title, description, screenshots — laptop &amp; mobile, links)</div></div>
+    </div>
+
+    <!-- 7. ADMIN MODERATION -->
+    <div class="screen" id="screen-admin">
+      <div class="header">
+        <div class="logo">SITE LOGO</div>
+        <div class="navlinks"><span>Dashboard</span><span>Users</span><span>Content</span><span>Ads</span></div>
+        <div class="avatar">Admin</div>
+      </div>
+      <div class="modbar">Admin / Owner moderation panel — visible only to site owner role</div>
+      <div class="section-title">Flagged Content Queue</div>
+      <div class="qa"><b>Comment reported (3x)</b> — "placeholder comment text" <div class="meta">Blog: "Blog Title" · [Approve] [Remove] [Ban user]</div></div>
+      <div class="qa"><b>Blog reported</b> — "Blog Title" <div class="meta">Topic: Car Reviews · [Approve] [Unpublish] [Delete]</div></div>
+      <div class="section-title">Advertisement Manager</div>
+      <div class="row" style="padding:0 8px;">
+        <div class="card col"><div class="thumb small">ad creative</div><h4>Leaderboard Ad #1</h4><p>Placement: Home top · Active · [Edit] [Remove]</p></div>
+        <div class="card col"><div class="thumb small">ad creative</div><h4>In-feed Ad #2</h4><p>Placement: Feed · Active · [Edit] [Remove]</p></div>
+      </div>
+      <div class="box"><div class="btn">+ Upload new advertisement (image + target URL + placement + schedule)</div></div>
+      <div class="section-title">Users &amp; Topic Owners</div>
+      <div class="box" style="font-size:11px;">Table placeholder: User | Social provider | Role (User / Topic Owner / Admin) | Status | Actions</div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  const screens = [
+    {id:'screen-login', label:'1. Login (social only)'},
+    {id:'screen-home', label:'2. Home / Feed'},
+    {id:'screen-topic', label:'3. Topic (Q&A/Review)'},
+    {id:'screen-blog', label:'4. Blog + Comments'},
+    {id:'screen-submit', label:'5. Submit / Edit'},
+    {id:'screen-portfolio', label:'6. My Portfolio'},
+    {id:'screen-admin', label:'7. Admin Moderation'},
+  ];
+  const navBar = document.getElementById('navBar');
+  screens.forEach((s,i)=>{
+    const b = document.createElement('button');
+    b.textContent = s.label;
+    b.onclick = ()=>showScreen(s.id, b);
+    if(i===0) b.classList.add('active');
+    navBar.appendChild(b);
+  });
+  function showScreen(id, btn){
+    document.querySelectorAll('.screen').forEach(el=>el.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+  }
+  document.getElementById(screens[0].id).classList.add('active');
+
+  function setDevice(mode){
+    const frame = document.getElementById('frame');
+    frame.className = 'frame ' + mode;
+    document.getElementById('btnDesktop').classList.toggle('active', mode==='desktop');
+    document.getElementById('btnMobile').classList.toggle('active', mode==='mobile');
+  }
+</script>
+
+</body>
+</html>

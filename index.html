@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Circuit — Community Topics, Reviews &amp; Blogs</title>
+<style>
+  :root{
+    --paper:#FAF8F4;
+    --panel:#FFFFFF;
+    --ink:#1B1F2B;
+    --navy:#24304D;
+    --navy-2:#324268;
+    --gold:#C9A227;
+    --gold-soft:#F3E7C4;
+    --line:#E4DFD3;
+    --muted:#6B7280;
+    --owner:#8B5E3C;
+    --owner-soft:#F1E3D3;
+    --admin:#8A2E2E;
+    --admin-soft:#F3DEDE;
+    --radius:10px;
+    --serif: Georgia, 'Iowan Old Style', 'Times New Roman', serif;
+    --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:var(--sans);background:var(--paper);color:var(--ink);}
+  a{color:inherit;}
+  button{font-family:inherit;cursor:pointer;}
+
+  /* ---------- shell / masthead ---------- */
+  .masthead{background:var(--navy);color:#fff;}
+  .masthead-top{display:flex;align-items:center;justify-content:space-between;padding:14px 28px;gap:16px;flex-wrap:wrap;}
+  .brand{display:flex;align-items:center;gap:10px;}
+  .brand .mark{width:30px;height:30px;border-radius:50%;background:var(--gold);color:var(--navy);display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-weight:bold;font-size:15px;}
+  .brand .name{font-family:var(--serif);font-size:20px;letter-spacing:.02em;}
+  .brand .tag{font-size:11px;color:#c7cee0;margin-left:8px;}
+  .masthead-nav{display:flex;gap:2px;padding:0 28px;border-top:1px solid rgba(255,255,255,.12);flex-wrap:wrap;}
+  .masthead-nav button{background:transparent;border:none;color:#cdd4e6;padding:11px 14px;font-size:13px;border-bottom:2px solid transparent;}
+  .masthead-nav button.active{color:#fff;border-bottom:2px solid var(--gold);font-weight:600;}
+  .masthead-nav button:hover{color:#fff;}
+  .session{display:flex;align-items:center;gap:10px;}
+  .session .who{font-size:12px;color:#dfe4f0;}
+  .roledemo{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.08);padding:4px 8px;border-radius:20px;font-size:11px;}
+  .roledemo select{background:transparent;color:#fff;border:none;font-size:11px;}
+  .roledemo select option{color:#111;}
+  .btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--panel);color:var(--ink);padding:8px 14px;border-radius:8px;font-size:13px;font-weight:600;}
+  .btn:hover{border-color:var(--navy);}
+  .btn.primary{background:var(--navy);color:#fff;border-color:var(--navy);}
+  .btn.primary:hover{background:var(--navy-2);}
+  .btn.gold{background:var(--gold);border-color:var(--gold);color:#3a2f05;}
+  .btn.ghost{background:transparent;border-color:transparent;color:#dfe4f0;}
+  .btn.ghost:hover{background:rgba(255,255,255,.08);}
+  .btn.small{padding:5px 10px;font-size:12px;}
+  .btn.danger{color:var(--admin);border-color:var(--admin-soft);}
+
+  main{max-width:1040px;margin:0 auto;padding:28px 20px 80px;}
+  .view{display:none;}
+  .view.active{display:block;animation:fade .25s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:none;}}
+
+  h1,h2,h3{font-family:var(--serif);margin:0;}
+  .page-title{font-size:28px;margin-bottom:4px;}
+  .page-sub{color:var(--muted);font-size:13px;margin-bottom:22px;}
+
+  /* role badge — signature element used throughout */
+  .badge{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:2px 7px;border-radius:20px;}
+  .badge.you{background:var(--gold-soft);color:#6b5511;}
+  .badge.owner{background:var(--owner-soft);color:var(--owner);}
+  .badge.admin{background:var(--admin-soft);color:var(--admin);}
+  .badge.public{background:#EEF0F5;color:var(--muted);}
+
+  /* ---------- ad slots ---------- */
+  .ad{border:1px dashed #c9b98f;background:#FFFCF3;color:#8a7638;text-align:center;padding:14px;font-size:11px;letter-spacing:.04em;border-radius:8px;margin:18px 0;text-transform:uppercase;}
+
+  /* ---------- cards / feed ---------- */
+  .section-head{display:flex;align-items:baseline;justify-content:space-between;margin:30px 0 12px;}
+  .section-head h2{font-size:18px;}
+  .section-head .more{font-size:12px;color:var(--navy);font-weight:600;}
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+  .grid.blogs{grid-template-columns:repeat(2,1fr);}
+  @media(max-width:800px){.grid,.grid.blogs{grid-template-columns:1fr;}}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;transition:box-shadow .15s,transform .15s;}
+  .card:hover{box-shadow:0 6px 20px rgba(36,48,77,.08);transform:translateY(-1px);}
+  .card .cover{height:120px;background:linear-gradient(135deg,var(--navy) 0%,var(--navy-2) 100%);display:flex;align-items:center;justify-content:center;color:#e7ebf5;font-size:11px;letter-spacing:.05em;text-transform:uppercase;}
+  .card .body{padding:12px 14px;}
+  .card h4{font-family:var(--serif);font-size:15px;margin:0 0 5px;}
+  .card p{margin:0;font-size:12px;color:var(--muted);}
+  .card .meta{display:flex;align-items:center;gap:6px;margin-top:8px;font-size:11px;color:var(--muted);}
+
+  .topic-mini{cursor:pointer;}
+  .topic-mini .icon{width:34px;height:34px;border-radius:8px;background:var(--gold-soft);color:#6b5511;display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-weight:bold;}
+  .topic-mini .body{display:flex;gap:10px;align-items:center;}
+
+  .clickable{cursor:pointer;}
+
+  /* ---------- topic thread / qa ---------- */
+  .toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;}
+  .thread-item{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px;margin-bottom:10px;}
+  .thread-item .tag{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;padding:2px 7px;border-radius:5px;background:#EEF0F5;color:var(--navy);margin-right:6px;}
+  .thread-item .tag.review{background:var(--gold-soft);color:#6b5511;}
+  .thread-item b{font-size:14px;}
+  .thread-item .meta{font-size:11px;color:var(--muted);margin-top:6px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+  .stars{color:var(--gold);letter-spacing:1px;}
+
+  /* ---------- blog detail ---------- */
+  .article-head{margin-bottom:14px;}
+  .article-head h1{font-size:30px;line-height:1.2;}
+  .article-meta{color:var(--muted);font-size:12px;margin-top:8px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+  .hero{height:220px;border-radius:var(--radius);background:linear-gradient(135deg,var(--navy),var(--navy-2));margin:16px 0;display:flex;align-items:center;justify-content:center;color:#dfe4f0;font-size:12px;text-transform:uppercase;letter-spacing:.05em;}
+  .article-body{font-size:15px;line-height:1.75;color:#2b2f3a;}
+  .article-body p{margin:0 0 14px;}
+  .comment{border-top:1px solid var(--line);padding:12px 0;}
+  .comment .who{font-weight:700;font-size:13px;}
+  .comment .txt{font-size:13px;margin:3px 0 4px;}
+  .comment .meta{font-size:11px;color:var(--muted);display:flex;gap:8px;align-items:center;}
+
+  /* ---------- forms ---------- */
+  .form-panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:20px;}
+  .field{margin-bottom:14px;}
+  .field label{display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin-bottom:5px;}
+  .field input[type=text], .field textarea, .field select{
+    width:100%;padding:9px 11px;border:1px solid var(--line);border-radius:7px;font-size:13px;font-family:inherit;background:#fdfcfa;
+  }
+  .field textarea{resize:vertical;}
+  .field input[type=file]{font-size:12px;}
+  .typerow{display:flex;gap:8px;}
+  .typerow .opt{flex:1;text-align:center;padding:9px;border:1px solid var(--line);border-radius:7px;font-size:13px;font-weight:600;color:var(--muted);}
+  .typerow .opt.sel{border-color:var(--navy);color:var(--navy);background:#EEF0F5;}
+
+  /* ---------- portfolio ---------- */
+  .profile-card{display:flex;gap:16px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:18px;}
+  .avatar-lg{width:64px;height:64px;border-radius:50%;background:var(--navy);color:#fff;display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:22px;flex:none;}
+  .links-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;}
+  .link-chip{font-size:11px;border:1px solid var(--line);padding:4px 10px;border-radius:20px;color:var(--muted);display:flex;align-items:center;gap:5px;}
+  .doc-card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:14px;display:flex;flex-direction:column;gap:8px;}
+  .doc-icon{width:36px;height:36px;border-radius:7px;background:#EEF0F5;color:var(--navy);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;}
+  .proj-shots{display:grid;grid-template-columns:2fr 1fr;gap:6px;}
+  .proj-shots .shot{background:#EEF0F5;border-radius:6px;height:70px;display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--muted);}
+
+  /* ---------- admin ---------- */
+  .flag-item{background:var(--panel);border:1px solid var(--admin-soft);border-left:3px solid var(--admin);border-radius:8px;padding:12px 14px;margin-bottom:10px;}
+  .flag-item .meta{font-size:11px;color:var(--muted);margin-top:6px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+  .lockmsg{background:var(--admin-soft);color:var(--admin);border-radius:8px;padding:12px 16px;font-size:12px;margin-bottom:20px;}
+  table.utable{width:100%;border-collapse:collapse;font-size:12px;}
+  table.utable th{text-align:left;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.04em;padding:8px 10px;border-bottom:1px solid var(--line);}
+  table.utable td{padding:9px 10px;border-bottom:1px solid var(--line);}
+
+  /* ---------- login ---------- */
+  .login-wrap{max-width:360px;margin:60px auto;text-align:center;}
+  .login-wrap .mark-lg{width:52px;height:52px;border-radius:50%;background:var(--gold);color:var(--navy);display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-weight:bold;font-size:24px;margin:0 auto 14px;}
+  .login-wrap p{color:var(--muted);font-size:13px;}
+  .provider-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:11px;margin:8px 0;border-radius:8px;border:1px solid var(--line);background:#fff;font-size:13px;font-weight:600;}
+  .provider-btn:hover{border-color:var(--navy);}
+  .fine{font-size:10px;color:var(--muted);margin-top:16px;}
+
+  .footer{text-align:center;color:var(--muted);font-size:11px;padding:30px 0;}
+  .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 18px;border-radius:8px;font-size:13px;opacity:0;pointer-events:none;transition:opacity .25s, transform .25s;z-index:50;}
+  .toast.show{opacity:1;transform:translate(-50%,-4px);}
+  .empty{color:var(--muted);font-size:12px;padding:16px;text-align:center;border:1px dashed var(--line);border-radius:8px;}
+</style>
+</head>
+<body>
+
+<div class="masthead">
+  <div class="masthead-top">
+    <div class="brand">
+      <div class="mark">C</div>
+      <div class="name">Circuit</div>
+      <div class="tag">topics · reviews · blogs</div>
+    </div>
+    <div class="session">
+      <div class="roledemo" title="Demo control only — real build swaps this for actual OAuth session">
+        <span>Preview as</span>
+        <select id="roleSwitch" onchange="switchRole(this.value)">
+          <option value="visitor">Visitor</option>
+          <option value="user">Registered user</option>
+          <option value="owner">Topic owner</option>
+          <option value="admin">Site admin</option>
+        </select>
+      </div>
+      <span class="who" id="whoLabel"></span>
+      <button class="btn ghost" id="authBtn" onclick="handleAuthClick()">Sign in</button>
+    </div>
+  </div>
+  <div class="masthead-nav" id="navBar"></div>
+</div>
+
+<main>
+
+  <!-- LOGIN -->
+  <div class="view" id="v-login">
+    <div class="login-wrap">
+      <div class="mark-lg">C</div>
+      <h2>Sign in to Circuit</h2>
+      <p>No individual signup — continue with an account you already have.</p>
+      <button class="provider-btn" onclick="login('Google')">🔵 Continue with Google</button>
+      <button class="provider-btn" onclick="login('Facebook')">🔷 Continue with Facebook</button>
+      <button class="provider-btn" onclick="login('Microsoft')">🟦 Continue with Microsoft</button>
+      <div class="fine">By continuing you agree to the Terms &amp; Content Policy. This demo simulates OAuth — a real build hands off to each provider.</div>
+    </div>
+  </div>
+
+  <!-- HOME -->
+  <div class="view" id="v-home">
+    <h1 class="page-title">Latest from the community</h1>
+    <div class="page-sub">Trending topics and fresh blog posts, all in one feed.</div>
+    <div class="ad">Ad slot — leaderboard banner · 728×90</div>
+
+    <div class="section-head"><h2>Trending topics</h2></div>
+    <div class="grid" id="topicGrid"></div>
+
+    <div class="section-head"><h2>Latest blogs</h2><span class="more clickable" onclick="go('submit')">+ Write a post</span></div>
+    <div class="grid blogs" id="blogGrid"></div>
+
+    <div class="footer">Circuit · About · Contact · Terms — v1 draft</div>
+  </div>
+
+  <!-- TOPIC -->
+  <div class="view" id="v-topic">
+    <div id="topicHeader"></div>
+    <div class="toolbar">
+      <button class="btn primary small" onclick="openQaForm('question')">+ Ask a question</button>
+      <button class="btn small" onclick="openQaForm('review')">+ Post a review</button>
+    </div>
+    <div class="form-panel" id="qaForm" style="display:none;margin-bottom:14px;"></div>
+    <div id="qaList"></div>
+    <div class="ad">Ad slot — sidebar / in-thread</div>
+  </div>
+
+  <!-- BLOG -->
+  <div class="view" id="v-blog">
+    <div id="blogArticle"></div>
+  </div>
+
+  <!-- SUBMIT -->
+  <div class="view" id="v-submit">
+    <h1 class="page-title">Submit new content</h1>
+    <div class="page-sub">Start a new Topic for the community, or publish a Blog post.</div>
+    <div class="form-panel">
+      <div class="typerow" style="margin-bottom:16px;">
+        <div class="opt sel" id="typeTopicBtn" onclick="setSubmitType('topic')">Topic</div>
+        <div class="opt" id="typeBlogBtn" onclick="setSubmitType('blog')">Blog post</div>
+      </div>
+      <div class="field"><label>Title</label><input type="text" id="subTitle" placeholder="Enter a title"></div>
+      <div class="field" id="subCategoryField"><label>Category</label><input type="text" id="subCategory" placeholder="e.g. Car Reviews"></div>
+      <div class="field"><label>Content</label><textarea id="subContent" rows="6" placeholder="Write your content..."></textarea></div>
+      <div class="field" id="subImageField"><label>Cover image (JPEG only)</label><input type="file" accept="image/jpeg"></div>
+      <div class="toolbar">
+        <button class="btn" onclick="toast('Draft saved locally')">Save draft</button>
+        <button class="btn primary" onclick="submitContent()">Publish</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PORTFOLIO -->
+  <div class="view" id="v-portfolio">
+    <h1 class="page-title">My Portfolio</h1>
+    <div class="page-sub" id="portfolioSub">Projects, accomplishments, and credentials.</div>
+
+    <div class="profile-card">
+      <div class="avatar-lg">JD</div>
+      <div>
+        <h3 id="pfName">Jordan Diaz</h3>
+        <div class="links-row" id="pfLinks"></div>
+      </div>
+      <div style="margin-left:auto;" id="pfEditProfileBtn"></div>
+    </div>
+    <div class="form-panel" id="profileForm" style="display:none;margin-top:12px;"></div>
+
+    <div class="section-head"><h2>Documents</h2></div>
+    <div class="grid" id="docGrid"></div>
+    <div id="docUploadRow"></div>
+
+    <div class="section-head"><h2>Projects</h2></div>
+    <div class="grid blogs" id="projGrid"></div>
+    <div id="projAddRow"></div>
+    <div class="form-panel" id="projForm" style="display:none;margin-top:12px;"></div>
+  </div>
+
+  <!-- ADMIN -->
+  <div class="view" id="v-admin">
+    <h1 class="page-title">Admin moderation</h1>
+    <div class="lockmsg">Visible only to the Site Admin role.</div>
+
+    <div class="section-head"><h2>Flagged content queue</h2></div>
+    <div id="flagList"></div>
+
+    <div class="section-head"><h2>Advertisement manager</h2></div>
+    <div class="grid" id="adGrid"></div>
+    <div class="form-panel" id="adForm" style="margin-top:12px;"></div>
+
+    <div class="section-head"><h2>Users &amp; topic owners</h2></div>
+    <table class="utable">
+      <tr><th>User</th><th>Provider</th><th>Role</th><th>Status</th><th></th></tr>
+      <tr><td>Priya S.</td><td>Google</td><td>Topic Owner</td><td>Active</td><td><button class="btn small">Manage</button></td></tr>
+      <tr><td>user456</td><td>Facebook</td><td>User</td><td>Active</td><td><button class="btn small">Manage</button></td></tr>
+      <tr><td>user789</td><td>Microsoft</td><td>User</td><td>Flagged 1x</td><td><button class="btn small">Manage</button></td></tr>
+    </table>
+  </div>
+
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ---------------- state ---------------- */
+const ROLE_LABEL = {visitor:'Visitor', user:'Registered user', owner:'Topic owner', admin:'Site admin'};
+let state = null;
+let signedIn = false;
+let role = 'visitor'; // visitor | user | owner | admin
+let currentTopic = null;
+let currentBlog = null;
+let submitType = 'topic';
+let qaFormType = null;
+
+const seed = {
+  topics: [
+    {id:'t1', title:'Car Reviews', desc:'2024 model comparisons, owner reviews, reliability talk.', followers:1200, icon:'🚗'},
+    {id:'t2', title:'Home Cooking', desc:'Recipes, technique questions, kitchen gear.', followers:860, icon:'🍳'},
+    {id:'t3', title:'Tech & Gadgets', desc:'Phones, laptops, smart home, first impressions.', followers:3100, icon:'💻'},
+  ],
+  blogs: [
+    {id:'b1', topicId:'t1', title:'Living with a hybrid for 100k miles', author:'Priya S.', comments:[
+      {who:'user123', txt:'Great writeup — how was resale value?', t:'2h ago'},
+      {who:'user456', txt:'Matches my experience with the same trim.', t:'5h ago'},
+    ]},
+    {id:'b2', topicId:'t3', title:'Six months with the new ultrabook lineup', author:'Marcus T.', comments:[
+      {who:'user789', txt:'Battery claims still holding up?', t:'1d ago'},
+    ]},
+    {id:'b3', topicId:'t2', title:'The one pan technique that fixed my weeknight dinners', author:'Aiko N.', comments:[]},
+    {id:'b4', topicId:'t1', title:'City-trim vs. sport-trim: a fair comparison', author:'Priya S.', comments:[]},
+  ],
+  qa: {
+    t1: [
+      {type:'question', title:'How reliable is the hybrid engine after 100k miles?', by:'user123', count:'4 answers'},
+      {type:'review', title:'Great fuel economy, cramped back seat', by:'user456', rating:4, count:'8 comments'},
+      {type:'question', title:'Best trim for city driving?', by:'user789', count:'2 answers'},
+    ],
+    t2: [
+      {type:'question', title:'Best pan for high-heat searing?', by:'chefmarie', count:'3 answers'},
+    ],
+    t3: [
+      {type:'review', title:'Solid daily driver laptop, fans get loud under load', by:'user321', rating:3, count:'5 comments'},
+    ],
+  },
+  docs: [
+    {id:'d1', name:'Resume.pdf', type:'Resume'},
+    {id:'d2', name:'Cover Letter.pdf', type:'Cover Letter'},
+    {id:'d3', name:'Project Portfolio.pdf', type:'Project Portfolio'},
+  ],
+  projects: [
+    {id:'p1', title:'Route Planner App', desc:'A trip-planning tool with offline maps.', tags:['React','Maps API']},
+    {id:'p2', title:'Inventory Dashboard', desc:'Internal tool for tracking warehouse stock.', tags:['Node','Postgres']},
+  ],
+  ads: [
+    {id:'a1', name:'Leaderboard Ad #1', placement:'Home top', status:'Active'},
+    {id:'a2', name:'In-feed Ad #2', placement:'Feed', status:'Active'},
+  ],
+  flags: [
+    {id:'f1', type:'Comment', text:'"placeholder comment text"', context:'Blog: Living with a hybrid for 100k miles', reports:3},
+    {id:'f2', type:'Blog', text:'City-trim vs. sport-trim: a fair comparison', context:'Topic: Car Reviews', reports:1},
+  ],
+  profile: {linkedin:'linkedin.com/in/jordandiaz', github:'github.com/jordandiaz', cert:'AWS Certified Solutions Architect'},
+};
+
+async function loadState(){
+  try{
+    const res = await window.storage.get('circuit-demo-data');
+    state = JSON.parse(res.value);
+  }catch(e){
+    state = JSON.parse(JSON.stringify(seed));
+    await saveState();
+  }
+}
+async function saveState(){
+  try{ await window.storage.set('circuit-demo-data', JSON.stringify(state)); }catch(e){ console.warn('storage save failed', e); }
+}
+
+/* ---------------- nav ---------------- */
+const NAV = [
+  {id:'home', label:'Home', view:'v-home'},
+  {id:'topics', label:'Topics', view:'v-home'},
+  {id:'portfolio', label:'My Portfolio', view:'v-portfolio'},
+  {id:'submit', label:'Submit', view:'v-submit'},
+  {id:'admin', label:'Admin', view:'v-admin', adminOnly:true},
+];
+
+function renderNav(){
+  const bar = document.getElementById('navBar');
+  bar.innerHTML = '';
+  NAV.forEach(n=>{
+    if(n.adminOnly && role!=='admin') return;
+    const b = document.createElement('button');
+    b.textContent = n.label;
+    b.onclick = ()=>go(n.id);
+    bar.appendChild(b);
+  });
+}
+
+function go(id){
+  if(id==='login'){ showView('v-login'); return; }
+  const entry = NAV.find(n=>n.id===id) || {view:'v-'+id};
+  document.querySelectorAll('.masthead-nav button').forEach(b=>b.classList.remove('active'));
+  const idx = NAV.findIndex(n=>n.id===id);
+  if(idx>=0 && document.querySelectorAll('.masthead-nav button')[idx]) document.querySelectorAll('.masthead-nav button')[idx].classList.add('active');
+  showView(entry.view);
+  if(id==='home'||id==='topics') renderHome();
+  if(id==='portfolio') renderPortfolio();
+  if(id==='admin') renderAdmin();
+  if(id==='submit') renderSubmit();
+}
+function showView(viewId){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById(viewId).classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ---------------- auth (demo) ---------------- */
+function handleAuthClick(){
+  if(signedIn){ signedIn=false; role='visitor'; updateSession(); go('home'); toast('Signed out'); }
+  else { showView('v-login'); }
+}
+function login(provider){
+  signedIn = true;
+  role = 'user';
+  document.getElementById('roleSwitch').value = 'user';
+  updateSession();
+  toast('Signed in with '+provider+' (demo)');
+  go('home');
+}
+function switchRole(v){
+  role = v;
+  signedIn = v!=='visitor';
+  updateSession();
+  renderNav();
+  // re-render whichever view is active
+  if(document.getElementById('v-home').classList.contains('active')) renderHome();
+  if(document.getElementById('v-portfolio').classList.contains('active')) renderPortfolio();
+  if(document.getElementById('v-admin').classList.contains('active')) renderAdmin();
+  if(currentTopic) renderTopic(currentTopic);
+  if(currentBlog) renderBlog(currentBlog);
+}
+function updateSession(){
+  document.getElementById('whoLabel').textContent = signedIn ? ROLE_LABEL[role] : '';
+  document.getElementById('authBtn').textContent = signedIn ? 'Sign out' : 'Sign in';
+  renderNav();
+}
+
+/* ---------------- home ---------------- */
+function renderHome(){
+  const tg = document.getElementById('topicGrid');
+  tg.innerHTML = state.topics.map(t=>`
+    <div class="card topic-mini clickable" onclick="openTopic('${t.id}')">
+      <div class="body">
+        <div class="row body" style="display:flex;gap:10px;align-items:center;">
+          <div class="icon">${t.icon}</div>
+          <div>
+            <h4 style="margin-bottom:2px;">${t.title}</h4>
+            <p>${t.followers} followers</p>
+          </div>
+        </div>
+      </div>
+    </div>`).join('');
+
+  const bg = document.getElementById('blogGrid');
+  const cards = state.blogs.map((b,i)=>{
+    const topic = state.topics.find(t=>t.id===b.topicId);
+    const card = `<div class="card clickable" onclick="openBlog('${b.id}')">
+      <div class="cover">${topic?topic.title:'Blog'}</div>
+      <div class="body">
+        <h4>${b.title}</h4>
+        <p>by ${b.author} · ${topic?topic.title:''} · ${b.comments.length} comments</p>
+      </div>
+    </div>`;
+    return card;
+  });
+  // insert an in-feed ad after the 2nd card
+  cards.splice(2,0,'<div class="ad" style="grid-column:1/-1;">Ad slot — in-feed · 300×250</div>');
+  bg.innerHTML = cards.join('');
+}
+
+/* ---------------- topic / qa ---------------- */
+function openTopic(id){ currentTopic = id; go('topic-inner'); renderTopic(id); showView('v-topic'); }
+function renderTopic(id){
+  const t = state.topics.find(x=>x.id===id);
+  document.getElementById('topicHeader').innerHTML = `
+    <div class="page-sub" style="margin-bottom:6px;"><span class="clickable" onclick="go('home')">← All topics</span></div>
+    <h1 class="page-title">${t.icon} ${t.title}</h1>
+    <div class="page-sub">${t.desc} · ${t.followers} followers</div>`;
+  const items = state.qa[id] || [];
+  document.getElementById('qaList').innerHTML = items.length ? items.map((q,i)=>`
+    <div class="thread-item">
+      <span class="tag ${q.type==='review'?'review':''}">${q.type}</span>
+      <b>${q.title}</b>
+      ${q.type==='review' ? `<div class="stars">${'★'.repeat(q.rating)}${'☆'.repeat(5-q.rating)}</div>` : ''}
+      <div class="meta">
+        <span>${q.type==='question'?'Asked':'Reviewed'} by ${q.by}</span><span>·</span><span>${q.count}</span>
+        ${(role==='owner'||role==='admin') ? `<span class="badge ${role}">${role} controls</span> <button class="btn small" onclick="removeQa('${id}',${i})">Delete</button>` : ''}
+      </div>
+    </div>`).join('') : '<div class="empty">No questions or reviews yet — be the first to post.</div>';
+  document.getElementById('qaForm').style.display='none';
+  qaFormType = null;
+}
+function openQaForm(type){
+  if(role==='visitor'){ toast('Sign in to post'); showView('v-login'); return; }
+  qaFormType = type;
+  const f = document.getElementById('qaForm');
+  f.style.display='block';
+  f.innerHTML = `
+    <div class="field"><label>${type==='question'?'Your question':'Review title'}</label><input type="text" id="qaTitle" placeholder="${type==='question'?'e.g. Best trim for winter driving?':'e.g. Great fuel economy, cramped back seat'}"></div>
+    ${type==='review' ? `<div class="field"><label>Rating</label><select id="qaRating"><option>5</option><option>4</option><option>3</option><option>2</option><option>1</option></select></div>` : ''}
+    <div class="field"><label>Details</label><textarea id="qaBody" rows="3" placeholder="Add detail..."></textarea></div>
+    <button class="btn primary" onclick="submitQa()">Post ${type}</button>`;
+}
+function submitQa(){
+  const title = document.getElementById('qaTitle').value.trim();
+  if(!title){ toast('Add a title first'); return; }
+  const entry = {type:qaFormType, title, by:'You', count: qaFormType==='question'?'0 answers':'0 comments'};
+  if(qaFormType==='review') entry.rating = parseInt(document.getElementById('qaRating').value,10);
+  state.qa[currentTopic] = state.qa[currentTopic] || [];
+  state.qa[currentTopic].unshift(entry);
+  saveState();
+  toast('Posted');
+  renderTopic(currentTopic);
+}
+function removeQa(topicId, idx){
+  state.qa[topicId].splice(idx,1);
+  saveState();
+  renderTopic(topicId);
+  toast('Removed');
+}
+
+/* ---------------- blog detail ---------------- */
+function openBlog(id){ currentBlog = id; renderBlog(id); showView('v-blog'); }
+function renderBlog(id){
+  const b = state.blogs.find(x=>x.id===id);
+  const topic = state.topics.find(t=>t.id===b.topicId);
+  const canModerate = role==='admin' || (role==='owner');
+  document.getElementById('blogArticle').innerHTML = `
+    <div class="page-sub"><span class="clickable" onclick="go('home')">← Back to feed</span></div>
+    <div class="article-head">
+      <h1>${b.title}</h1>
+      <div class="article-meta">
+        <span>by ${b.author}</span><span>·</span><span>Topic: ${topic.title}</span>
+        ${canModerate ? `<span class="badge ${role}">${role}</span><button class="btn small" onclick="toast('Blog unpublished (demo)')">Unpublish</button>` : ''}
+      </div>
+    </div>
+    <div class="hero">Hero image</div>
+    <div class="article-body">
+      <p>This is placeholder article copy standing in for the full post body — headings, images, and embeds will render here once real content is authored.</p>
+      <p>Second paragraph placeholder, showing how longer posts will read in the article layout.</p>
+    </div>
+    <div class="ad">Ad slot — mid-article</div>
+    <div class="section-head"><h2>Comments (${b.comments.length})</h2></div>
+    <div class="form-panel">
+      <textarea id="commentInput" rows="2" placeholder="${signedIn?'Add a comment...':'Sign in to comment'}" ${signedIn?'':'disabled'}></textarea>
+      <button class="btn primary" style="margin-top:8px;" onclick="postComment('${b.id}')" ${signedIn?'':'disabled'}>Post comment</button>
+    </div>
+    <div id="commentList">
+      ${b.comments.length ? b.comments.map((c,i)=>`
+        <div class="comment">
+          <div class="who">${c.who}</div>
+          <div class="txt">${c.txt}</div>
+          <div class="meta"><span>${c.t}</span><span>·</span><span class="clickable">Reply</span>
+          ${canModerate ? `<span>·</span><span class="clickable" onclick="removeComment('${b.id}',${i})">Delete</span>` : ''}</div>
+        </div>`).join('') : '<div class="empty">No comments yet.</div>'}
+    </div>`;
+}
+function postComment(blogId){
+  const el = document.getElementById('commentInput');
+  const txt = el.value.trim();
+  if(!txt) return;
+  const b = state.blogs.find(x=>x.id===blogId);
+  b.comments.unshift({who:'You', txt, t:'just now'});
+  saveState();
+  renderBlog(blogId);
+  toast('Comment posted');
+}
+function removeComment(blogId, idx){
+  const b = state.blogs.find(x=>x.id===blogId);
+  b.comments.splice(idx,1);
+  saveState();
+  renderBlog(blogId);
+  toast('Comment removed');
+}
+
+/* ---------------- submit ---------------- */
+function renderSubmit(){
+  if(role==='visitor'){ toast('Sign in to submit content'); showView('v-login'); return; }
+  setSubmitType(submitType);
+}
+function setSubmitType(t){
+  submitType = t;
+  document.getElementById('typeTopicBtn').classList.toggle('sel', t==='topic');
+  document.getElementById('typeBlogBtn').classList.toggle('sel', t==='blog');
+  document.getElementById('subImageField').style.display = t==='blog' ? 'block':'none';
+  document.getElementById('subCategoryField').style.display = t==='blog' ? 'block':'none';
+}
+function submitContent(){
+  const title = document.getElementById('subTitle').value.trim();
+  if(!title){ toast('Add a title first'); return; }
+  if(submitType==='topic'){
+    const id = 't'+(state.topics.length+1);
+    state.topics.push({id, title, desc:document.getElementById('subContent').value.trim()||'New community topic.', followers:0, icon:'✳️'});
+    state.qa[id] = [];
+  } else {
+    const cat = document.getElementById('subCategory').value.trim();
+    let topic = state.topics.find(t=>t.title.toLowerCase()===cat.toLowerCase());
+    if(!topic){ topic = state.topics[0]; }
+    state.blogs.unshift({id:'b'+(state.blogs.length+1), topicId:topic.id, title, author:'You', comments:[]});
+  }
+  saveState();
+  toast(submitType==='topic'?'Topic published':'Blog published');
+  document.getElementById('subTitle').value='';
+  document.getElementById('subContent').value='';
+  go('home');
+}
+
+/* ---------------- portfolio ---------------- */
+function renderPortfolio(){
+  const isOwnerView = role==='admin'; // the site owner IS the admin in this v1 model
+  document.getElementById('portfolioSub').innerHTML = isOwnerView
+    ? 'Owner view — you can edit everything below.'
+    : 'Public view — read-only. <span class="badge public">read-only</span>';
+
+  document.getElementById('pfLinks').innerHTML = `
+    <div class="link-chip">🔗 LinkedIn: ${state.profile.linkedin} ${isOwnerView?'<span class="badge owner">owner-only edit</span>':''}</div>
+    <div class="link-chip">🐙 GitHub: ${state.profile.github} ${isOwnerView?'<span class="badge owner">owner-only edit</span>':''}</div>
+    <div class="link-chip">🎓 ${state.profile.cert} ${isOwnerView?'<span class="badge owner">owner-only edit</span>':''}</div>`;
+  document.getElementById('pfEditProfileBtn').innerHTML = isOwnerView ? `<button class="btn small" onclick="toggleProfileForm()">Edit profile</button>` : '';
+  document.getElementById('profileForm').style.display = 'none';
+
+  document.getElementById('docGrid').innerHTML = state.docs.map(d=>`
+    <div class="doc-card">
+      <div class="doc-icon">PDF</div>
+      <h4 style="font-size:13px;margin:0;">${d.name}</h4>
+      <p style="font-size:11px;color:var(--muted);margin:0;">${d.type}</p>
+      ${isOwnerView ? `<div class="row" style="display:flex;gap:6px;"><button class="btn small">Replace</button><button class="btn small danger" onclick="removeDoc('${d.id}')">Delete</button></div>` : ''}
+    </div>`).join('');
+  document.getElementById('docUploadRow').innerHTML = isOwnerView ? `
+    <div class="form-panel" style="margin-top:10px;">
+      <div class="field"><label>Upload document (PDF only)</label><input type="file" accept="application/pdf"></div>
+      <button class="btn small" onclick="addDoc()">Add document</button>
+    </div>` : '';
+
+  document.getElementById('projGrid').innerHTML = state.projects.length ? state.projects.map(p=>`
+    <div class="card">
+      <div class="body">
+        <div class="proj-shots">
+          <div class="shot">screen — laptop</div>
+          <div class="shot">screen — mobile</div>
+        </div>
+        <h4 style="margin-top:10px;">${p.title}</h4>
+        <p>${p.desc}</p>
+        ${isOwnerView ? `<div class="toolbar" style="margin-top:8px;"><button class="btn small">Edit</button><button class="btn small danger" onclick="removeProject('${p.id}')">Delete</button></div>` : ''}
+      </div>
+    </div>`).join('') : '<div class="empty">No projects added yet.</div>';
+  document.getElementById('projAddRow').innerHTML = isOwnerView ? `<button class="btn gold" style="margin-top:10px;" onclick="toggleProjForm()">+ Add new project</button>` : '';
+  document.getElementById('projForm').style.display='none';
+}
+function toggleProfileForm(){
+  const f = document.getElementById('profileForm');
+  const show = f.style.display==='none';
+  f.style.display = show ? 'block':'none';
+  if(show) f.innerHTML = `
+    <div class="field"><label>LinkedIn URL</label><input type="text" id="editLinkedin" value="${state.profile.linkedin}"></div>
+    <div class="field"><label>GitHub URL</label><input type="text" id="editGithub" value="${state.profile.github}"></div>
+    <div class="field"><label>Certificate credentials</label><input type="text" id="editCert" value="${state.profile.cert}"></div>
+    <button class="btn primary" onclick="saveProfile()">Save</button>`;
+}
+function saveProfile(){
+  state.profile.linkedin = document.getElementById('editLinkedin').value.trim();
+  state.profile.github = document.getElementById('editGithub').value.trim();
+  state.profile.cert = document.getElementById('editCert').value.trim();
+  saveState();
+  toast('Profile updated');
+  renderPortfolio();
+}
+function addDoc(){
+  state.docs.push({id:'d'+(state.docs.length+1), name:'New-Upload.pdf', type:'Document'});
+  saveState(); renderPortfolio(); toast('Document added');
+}
+function removeDoc(id){
+  state.docs = state.docs.filter(d=>d.id!==id);
+  saveState(); renderPortfolio(); toast('Document removed');
+}
+function toggleProjForm(){
+  const f = document.getElementById('projForm');
+  f.style.display='block';
+  f.innerHTML = `
+    <div class="field"><label>Project title</label><input type="text" id="projTitle"></div>
+    <div class="field"><label>Short description</label><textarea id="projDesc" rows="2"></textarea></div>
+    <div class="field"><label>Screenshot — laptop (JPEG)</label><input type="file" accept="image/jpeg"></div>
+    <div class="field"><label>Screenshot — mobile (JPEG)</label><input type="file" accept="image/jpeg"></div>
+    <button class="btn primary" onclick="addProject()">Add project</button>`;
+}
+function addProject(){
+  const title = document.getElementById('projTitle').value.trim();
+  if(!title){ toast('Add a title first'); return; }
+  state.projects.push({id:'p'+(state.projects.length+1), title, desc:document.getElementById('projDesc').value.trim(), tags:[]});
+  saveState(); renderPortfolio(); toast('Project added');
+}
+function removeProject(id){
+  state.projects = state.projects.filter(p=>p.id!==id);
+  saveState(); renderPortfolio(); toast('Project removed');
+}
+
+/* ---------------- admin ---------------- */
+function renderAdmin(){
+  if(role!=='admin'){ toast('Admin only — switch role to preview'); go('home'); return; }
+  document.getElementById('flagList').innerHTML = state.flags.length ? state.flags.map((f,i)=>`
+    <div class="flag-item">
+      <b>${f.type} reported (${f.reports}x)</b> — ${f.text}
+      <div class="meta">
+        <span>${f.context}</span>
+        <button class="btn small" onclick="resolveFlag(${i},'approve')">Approve</button>
+        <button class="btn small danger" onclick="resolveFlag(${i},'remove')">Remove</button>
+        <button class="btn small danger" onclick="resolveFlag(${i},'ban')">Ban user</button>
+      </div>
+    </div>`).join('') : '<div class="empty">Queue is clear.</div>';
+
+  document.getElementById('adGrid').innerHTML = state.ads.map(a=>`
+    <div class="card"><div class="cover">${a.name}</div><div class="body">
+      <h4>${a.name}</h4><p>Placement: ${a.placement} · ${a.status}</p>
+      <div class="toolbar" style="margin-top:8px;"><button class="btn small">Edit</button><button class="btn small danger" onclick="removeAd('${a.id}')">Remove</button></div>
+    </div></div>`).join('');
+
+  document.getElementById('adForm').innerHTML = `
+    <div class="field"><label>Ad name</label><input type="text" id="adName" placeholder="e.g. Spring Sale Banner"></div>
+    <div class="field"><label>Target URL</label><input type="text" id="adUrl" placeholder="https://..."></div>
+    <div class="field"><label>Placement</label>
+      <select id="adPlacement"><option>Home top</option><option>Feed</option><option>Mid-article</option><option>Sidebar</option></select>
+    </div>
+    <div class="field"><label>Creative (JPEG)</label><input type="file" accept="image/jpeg"></div>
+    <button class="btn primary" onclick="addAd()">Upload advertisement</button>`;
+}
+function resolveFlag(i, action){
+  state.flags.splice(i,1);
+  saveState();
+  renderAdmin();
+  toast('Flag '+action+'d');
+}
+function addAd(){
+  const name = document.getElementById('adName').value.trim();
+  if(!name){ toast('Name the ad first'); return; }
+  state.ads.push({id:'a'+(state.ads.length+1), name, placement:document.getElementById('adPlacement').value, status:'Active'});
+  saveState(); renderAdmin(); toast('Ad added');
+}
+function removeAd(id){
+  state.ads = state.ads.filter(a=>a.id!==id);
+  saveState(); renderAdmin(); toast('Ad removed');
+}
+
+/* ---------------- misc ---------------- */
+let toastTimer;
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>t.classList.remove('show'), 1800);
+}
+
+/* ---------------- boot ---------------- */
+(async function init(){
+  await loadState();
+  updateSession();
+  renderNav();
+  go('home');
+})();
+</script>
+</body>
+</html>
