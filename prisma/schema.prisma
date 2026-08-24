@@ -1,0 +1,255 @@
+// Prisma schema for the Circuit CMS site.
+// Datasource points at Supabase Postgres in production (DATABASE_URL env var).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------- NextAuth required models ----------
+// These four models are the standard shape the Prisma adapter expects.
+// Do not rename fields — NextAuth reads/writes these directly.
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// ---------- App roles ----------
+// Global role. Per-topic ownership is tracked separately via TopicMembership,
+// so a user can be TOPIC_OWNER on one topic and USER on the rest.
+enum Role {
+  USER
+  TOPIC_OWNER
+  ADMIN
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  role          Role      @default(USER)
+  createdAt     DateTime  @default(now())
+
+  accounts Account[]
+  sessions Session[]
+
+  topicsOwned       TopicMembership[]
+  blogs             Blog[]
+  comments          Comment[]
+  qaItems           QAItem[]
+  answers           Answer[]
+  reportsFiled      Report[]           @relation("reporter")
+  reportsReviewed   Report[]           @relation("reviewer")
+  portfolioProjects PortfolioProject[]
+  portfolioDocs     PortfolioDocument[]
+}
+
+// ---------- Topics, blogs, Q&A ----------
+
+model Topic {
+  id            String   @id @default(cuid())
+  title         String
+  description   String?
+  followerCount Int      @default(0)
+  createdAt     DateTime @default(now())
+
+  memberships TopicMembership[]
+  blogs       Blog[]
+  qaItems     QAItem[]
+}
+
+model TopicMembership {
+  id      String @id @default(cuid())
+  topicId String
+  userId  String
+  role    Role   @default(TOPIC_OWNER) // owner or moderator of this specific topic
+
+  topic Topic @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([topicId, userId])
+}
+
+enum BlogStatus {
+  DRAFT
+  PUBLISHED
+  UNPUBLISHED
+}
+
+model Blog {
+  id            String     @id @default(cuid())
+  topicId       String
+  authorId      String
+  title         String
+  coverImageUrl String?
+  body          String     @db.Text
+  status        BlogStatus @default(PUBLISHED)
+  createdAt     DateTime   @default(now())
+
+  topic    Topic     @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  author   User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  comments Comment[]
+}
+
+model Comment {
+  id              String   @id @default(cuid())
+  blogId          String
+  authorId        String
+  parentCommentId String?
+  body            String   @db.Text
+  status          String   @default("visible") // visible | removed
+  createdAt       DateTime @default(now())
+
+  blog   Blog @relation(fields: [blogId], references: [id], onDelete: Cascade)
+  author User @relation(fields: [authorId], references: [id], onDelete: Cascade)
+}
+
+enum QAType {
+  QUESTION
+  REVIEW
+}
+
+model QAItem {
+  id        String   @id @default(cuid())
+  topicId   String
+  authorId  String
+  type      QAType
+  title     String
+  body      String?  @db.Text
+  rating    Int? // only set when type = REVIEW (1-5)
+  createdAt DateTime @default(now())
+
+  topic   Topic    @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  author  User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  answers Answer[]
+}
+
+model Answer {
+  id        String   @id @default(cuid())
+  qaItemId  String
+  authorId  String
+  body      String   @db.Text
+  createdAt DateTime @default(now())
+
+  qaItem QAItem @relation(fields: [qaItemId], references: [id], onDelete: Cascade)
+  author User   @relation(fields: [authorId], references: [id], onDelete: Cascade)
+}
+
+// ---------- Moderation ----------
+
+enum ReportStatus {
+  OPEN
+  APPROVED
+  REMOVED
+}
+
+model Report {
+  id         String       @id @default(cuid())
+  targetType String // blog | comment | qaItem
+  targetId   String
+  reporterId String
+  reason     String?
+  status     ReportStatus @default(OPEN)
+  reviewedById String?
+  createdAt  DateTime     @default(now())
+
+  reporter   User  @relation("reporter", fields: [reporterId], references: [id], onDelete: Cascade)
+  reviewedBy User? @relation("reviewer", fields: [reviewedById], references: [id])
+}
+
+// ---------- Advertising ----------
+
+enum AdPlacement {
+  LEADERBOARD
+  IN_FEED
+  MID_ARTICLE
+  SIDEBAR
+}
+
+model Advertisement {
+  id          String      @id @default(cuid())
+  imageUrl    String
+  targetUrl   String
+  placement   AdPlacement
+  status      String      @default("active") // active | paused
+  startDate   DateTime?
+  endDate     DateTime?
+  createdAt   DateTime    @default(now())
+}
+
+// ---------- Portfolio (single-owner section) ----------
+
+model PortfolioProfile {
+  id              String  @id @default(cuid())
+  linkedinUrl     String?
+  githubUrl       String?
+  certifications  String?
+}
+
+model PortfolioProject {
+  id                  String   @id @default(cuid())
+  ownerId             String
+  title               String
+  description         String?  @db.Text
+  screenshotLaptopUrl String?
+  screenshotMobileUrl String?
+  links               Json?
+  sortOrder           Int      @default(0)
+  createdAt           DateTime @default(now())
+
+  owner User @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+}
+
+enum DocType {
+  RESUME
+  COVER_LETTER
+  PORTFOLIO
+}
+
+model PortfolioDocument {
+  id         String   @id @default(cuid())
+  ownerId    String
+  type       DocType
+  fileUrl    String
+  fileFormat String   @default("pdf")
+  uploadedAt DateTime @default(now())
+
+  owner User @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+}
