@@ -6,12 +6,13 @@ import { postQaItem, deleteQaItem } from "@/lib/actions";
 
 export const dynamic = "force-dynamic";
 
-export default async function TopicDetailPage({ params }: { params: { topicId: string } }) {
+export default async function TopicDetailPage({ params }: { params: Promise<{ topicId: string }> }) {
+  const { topicId } = await params;
   const session = await getSessionOrNull();
   const role = (session?.user as any)?.role ?? null;
   const canModerate = role === "TOPIC_OWNER" || role === "ADMIN";
 
-  const topic = await prisma.topic.findUnique({ where: { id: params.topicId } });
+  const topic = await prisma.topic.findUnique({ where: { id: topicId } });
   if (!topic) {
     return (
       <>

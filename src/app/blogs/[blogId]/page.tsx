@@ -6,13 +6,14 @@ import { postComment, deleteComment } from "@/lib/actions";
 
 export const dynamic = "force-dynamic";
 
-export default async function BlogDetailPage({ params }: { params: { blogId: string } }) {
+export default async function BlogDetailPage({ params }: { params: Promise<{ blogId: string }> }) {
+  const { blogId } = await params;
   const session = await getSessionOrNull();
   const role = (session?.user as any)?.role ?? null;
   const canModerate = role === "TOPIC_OWNER" || role === "ADMIN";
 
   const blog = await prisma.blog.findUnique({
-    where: { id: params.blogId },
+    where: { id: blogId },
     include: { author: true, topic: true, comments: { include: { author: true }, orderBy: { createdAt: "desc" } } },
   });
 
