@@ -34,11 +34,18 @@ export const authOptions: NextAuthOptions = {
     // The site owner's email (OWNER_EMAIL env var) is auto-promoted to ADMIN
     // on every sign-in, so there's no manual "make me admin" step. Everyone
     // else keeps whatever role they already have (default: USER).
+    // Wrapped defensively — this must never block sign-in, even if the
+    // promotion update itself fails for some reason.
     async signIn({ user }) {
-      if (user.email && process.env.OWNER_EMAIL && user.email.toLowerCase() === process.env.OWNER_EMAIL.toLowerCase()) {
-        if ((user as any).role !== "ADMIN") {
-          await prisma.user.update({ where: { id: user.id }, data: { role: "ADMIN" } });
+      try {
+        if (user.email && process.env.OWNER_EMAIL && user.email.toLowerCase() === process.env.OWNER_EMAIL.toLowerCase()) {
+          await prisma.user.updateMany({
+            where: { email: { equals: user.email, mode: "insensitive" } },
+            data: { role: "ADMIN" },
+          });
         }
+      } catch (err) {
+        console.error("Owner auto-promotion failed (sign-in still allowed):", err);
       }
       return true;
     },
