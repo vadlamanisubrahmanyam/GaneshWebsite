@@ -3,8 +3,8 @@ import { Providers } from "./providers";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Circuit — Community Topics, Reviews & Blogs",
-  description: "Topics, Q&A/reviews, blogs, and a personal portfolio section.",
+  title: "Subrahmanyam — Community Topics, Reviews & Blogs",
+  description: "Topics, Q&A/reviews, blogs, and Subrahmanyam's personal portfolio section.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
