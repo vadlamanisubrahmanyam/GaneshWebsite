@@ -94,11 +94,37 @@ promoted to `ADMIN` — no manual role-editing step. Everyone else who signs in
 starts as a regular `USER` and can be promoted to `TOPIC_OWNER` or `ADMIN`
 later (a small admin UI for changing other users' roles is a good next step).
 
-## 6. Still to wire up
+## 6. File uploads (resume, project screenshots)
 
-- **File uploads** (blog covers, resumes, screenshots, ad creatives) — the
-  schema and delete flows are in place; actual upload needs Supabase Storage
-  connected (a signed upload URL + saving the resulting `fileUrl`).
+Portfolio documents (Resume/Cover Letter/Project Portfolio, PDF) and project
+screenshots (laptop/mobile, JPEG) upload to **Supabase Storage** and are
+publicly viewable — that's the point of this section, since it's meant to
+be shown to visitors as a work reference, not locked behind login.
+
+**One-time setup in Supabase:**
+1. Supabase dashboard → **Storage** → **New bucket**.
+2. Name it exactly `portfolio`.
+3. Toggle **Public bucket** ON (so uploaded files are viewable by anyone
+   with the link — required for showcasing your resume/projects publicly).
+4. Click **Create bucket**.
+
+**Env vars** (Project Settings → API):
+```
+SUPABASE_URL="https://YOUR-PROJECT.supabase.co"
+SUPABASE_SERVICE_ROLE_KEY="..."   # the "service_role" secret key — full access, server-only, never expose to the browser
+```
+Add both to `.env` locally and to Vercel's Environment Variables, then redeploy.
+
+Once set, sign in as the owner (Admin), go to `/portfolio`, and the Upload
+forms under Documents and Projects will actually save files to Supabase and
+show them immediately — no code changes needed beyond this.
+
+## 7. Still to wire up
+
+- **Blog cover images** — the Submit form doesn't yet upload a cover image;
+  it can reuse the same `uploadJpeg` helper in `src/lib/storage.ts`.
+- **Advertisement creative images** — the Admin ad form still takes a plain
+  target URL; the creative image upload can reuse the same storage helper.
 - **Reporting UI** — the `Report` model and admin resolution actions exist;
   a "Report" button on comments/blogs/Q&A items to actually create reports
   isn't built yet.

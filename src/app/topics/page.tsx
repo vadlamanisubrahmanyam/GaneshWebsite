@@ -16,8 +16,13 @@ export default async function TopicsPage() {
     <>
       <Nav />
       <main>
-        <h1>Topics</h1>
-        <p className="muted">Community-run discussion spaces — questions, reviews, and blog posts by category.</p>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <div>
+            <h1>Topics</h1>
+            <p className="muted">Community-run discussion spaces — questions, reviews, and blog posts by category.</p>
+          </div>
+          <a href="/submit?kind=topic" className="btn primary">+ New Topic</a>
+        </div>
 
         {topics.length === 0 && <p className="muted">No topics yet. Sign in and use Submit to create the first one.</p>}
         {topics.map((t: any) => (

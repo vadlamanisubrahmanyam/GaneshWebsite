@@ -60,6 +60,13 @@ export default async function TopicDetailPage({ params }: { params: Promise<{ to
           ) : null}
         </div>
 
+        {session && (
+          <p className="muted" style={{ marginBottom: 20 }}>
+            Want to write a full article instead?{" "}
+            <a href={`/submit?kind=blog&category=${encodeURIComponent(topic.title)}`}>Write a blog post in {topic.title} →</a>
+          </p>
+        )}
+
         {items.length === 0 && <p className="muted">No questions or reviews yet.</p>}
         {items.map((q: any) => (
           <div className="card" key={q.id}>

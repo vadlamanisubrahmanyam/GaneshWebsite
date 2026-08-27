@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireSession, requireRole } from "@/lib/guards";
+import { uploadPdf, uploadJpeg } from "@/lib/storage";
 
 // ---------- Topic / Q&A ----------
 
@@ -98,6 +99,24 @@ export async function updateProfile(formData: FormData) {
   revalidatePath("/portfolio");
 }
 
+export async function uploadDocument(formData: FormData) {
+  const session = await requireRole(["ADMIN"]);
+  const userId = (session.user as any).id as string;
+  const docType = String(formData.get("docType") || "RESUME") as "RESUME" | "COVER_LETTER" | "PORTFOLIO";
+  const file = formData.get("file") as File | null;
+  if (!file || file.size === 0) throw new Error("Choose a PDF file first");
+
+  const path = `documents/${docType.toLowerCase()}-${Date.now()}.pdf`;
+  const fileUrl = await uploadPdf(file, path);
+
+  // One active file per type — replace whatever was there before.
+  await prisma.portfolioDocument.deleteMany({ where: { ownerId: userId, type: docType } });
+  await prisma.portfolioDocument.create({
+    data: { ownerId: userId, type: docType, fileUrl, fileFormat: "pdf" },
+  });
+  revalidatePath("/portfolio");
+}
+
 export async function addProject(formData: FormData) {
   const session = await requireRole(["ADMIN"]);
   const userId = (session.user as any).id as string;
@@ -105,7 +124,22 @@ export async function addProject(formData: FormData) {
   const description = String(formData.get("description") || "").trim();
   if (!title) throw new Error("Title is required");
 
-  await prisma.portfolioProject.create({ data: { ownerId: userId, title, description } });
+  const laptopFile = formData.get("screenshotLaptop") as File | null;
+  const mobileFile = formData.get("screenshotMobile") as File | null;
+  const stamp = Date.now();
+
+  let screenshotLaptopUrl: string | undefined;
+  let screenshotMobileUrl: string | undefined;
+  if (laptopFile && laptopFile.size > 0) {
+    screenshotLaptopUrl = await uploadJpeg(laptopFile, `projects/${stamp}-laptop.jpg`);
+  }
+  if (mobileFile && mobileFile.size > 0) {
+    screenshotMobileUrl = await uploadJpeg(mobileFile, `projects/${stamp}-mobile.jpg`);
+  }
+
+  await prisma.portfolioProject.create({
+    data: { ownerId: userId, title, description, screenshotLaptopUrl, screenshotMobileUrl },
+  });
   revalidatePath("/portfolio");
 }
 
