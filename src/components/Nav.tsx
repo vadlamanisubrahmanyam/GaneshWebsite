@@ -10,8 +10,8 @@ export async function Nav() {
     <div className="masthead">
       <div className="brand">
         <Link href="/" style={{ display: "flex", alignItems: "center", gap: 10, textDecoration: "none", color: "#fff" }}>
-          <div className="mark">C</div>
-          <div className="name">Circuit</div>
+          <div className="mark">S</div>
+          <div className="name">Subrahmanyam</div>
         </Link>
       </div>
       <nav style={{ display: "flex", gap: 16, alignItems: "center", fontSize: 13 }}>
