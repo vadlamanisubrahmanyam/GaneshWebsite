@@ -25,7 +25,7 @@ export default async function PortfolioPage() {
     <>
       <Nav />
       <main>
-        <h1>My Portfolio</h1>
+        <h1>Subrahmanyam's Portfolio</h1>
         <p className="muted">
           {isOwner
             ? "Owner view — you can edit everything below."
