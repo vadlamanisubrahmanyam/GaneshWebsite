@@ -214,6 +214,19 @@ model Advertisement {
   createdAt   DateTime    @default(now())
 }
 
+// ---------- Audit log ----------
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  action     String // e.g. SIGN_IN, TOPIC_CREATED, BLOG_PUBLISHED, COMMENT_DELETED, AD_ADDED
+  actorId    String?
+  actorEmail String? // denormalized so log entries stay readable even if the user is later removed
+  targetType String?
+  targetId   String?
+  metadata   Json?
+  createdAt  DateTime @default(now())
+}
+
 // ---------- Roadmap widget (admin-editable "Upcoming Updates") ----------
 
 enum RoadmapStatus {

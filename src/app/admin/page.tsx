@@ -1,7 +1,7 @@
 import { Nav } from "@/components/Nav";
 import { prisma } from "@/lib/prisma";
 import { getSessionOrNull } from "@/lib/guards";
-import { resolveReport, addAdvertisement, removeAdvertisement, addRoadmapItem, setRoadmapStatus, removeRoadmapItem } from "@/lib/actions";
+import { resolveReport, addAdvertisement, removeAdvertisement, addRoadmapItem, setRoadmapStatus, removeRoadmapItem, clearAuditLogsBefore, clearAllAuditLogs } from "@/lib/actions";
 
 export const dynamic = "force-dynamic";
 
@@ -18,10 +18,12 @@ export default async function AdminPage() {
     );
   }
 
-  const [reports, ads, roadmapItems] = await Promise.all([
+  const [reports, ads, roadmapItems, logs, logCount] = await Promise.all([
     prisma.report.findMany({ where: { status: "OPEN" }, include: { reporter: true } }),
     prisma.advertisement.findMany({ orderBy: { createdAt: "desc" } }),
     prisma.roadmapItem.findMany({ orderBy: { sortOrder: "asc" } }),
+    prisma.auditLog.findMany({ orderBy: { createdAt: "desc" }, take: 50 }),
+    prisma.auditLog.count(),
   ]);
 
   return (
@@ -103,6 +105,41 @@ export default async function AdminPage() {
               <option value="DONE">Done</option>
             </select>
             <button className="btn primary" type="submit">Add to roadmap</button>
+          </form>
+        </div>
+
+        <h2>Activity log ({logCount} total{logCount > 50 ? ", showing latest 50" : ""})</h2>
+        {logs.length === 0 && <p className="muted">No activity recorded yet.</p>}
+        {logs.length > 0 && (
+          <table className="utable" style={{ marginBottom: 16 }}>
+            <tbody>
+              <tr>
+                <th>When</th>
+                <th>Action</th>
+                <th>By</th>
+                <th>Target</th>
+              </tr>
+              {logs.map((l: any) => (
+                <tr key={l.id}>
+                  <td>{new Date(l.createdAt).toLocaleString()}</td>
+                  <td>{l.action}</td>
+                  <td>{l.actorEmail ?? "system"}</td>
+                  <td>{l.targetType ? `${l.targetType}${l.targetId ? " · " + l.targetId.slice(0, 8) : ""}` : "—"}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+
+        <div className="card">
+          <h3>Clear activity log</h3>
+          <form action={async (fd: FormData) => { "use server"; await clearAuditLogsBefore(String(fd.get("before"))); }}>
+            <label className="muted" style={{ fontSize: 11 }}>Delete entries logged before this date</label>
+            <input type="date" name="before" required style={{ display: "block", padding: 8, margin: "6px 0 10px" }} />
+            <button className="btn" type="submit">Clear entries before date</button>
+          </form>
+          <form action={clearAllAuditLogs} style={{ marginTop: 10 }}>
+            <button className="btn danger" type="submit">Clear entire log</button>
           </form>
         </div>
       </main>

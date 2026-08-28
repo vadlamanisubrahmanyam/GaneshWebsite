@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireSession, requireRole } from "@/lib/guards";
 import { uploadPdf, uploadJpeg } from "@/lib/storage";
+import { logActivity } from "@/lib/audit";
 
 // ---------- Topic / Q&A ----------
 
@@ -19,8 +20,17 @@ export async function postQaItem(topicId: string, formData: FormData) {
 
   if (!title) throw new Error("Title is required");
 
-  await prisma.qAItem.create({
+  const item = await prisma.qAItem.create({
     data: { topicId, authorId: userId, type, title, body, rating },
+  });
+
+  await logActivity({
+    action: type === "REVIEW" ? "REVIEW_POSTED" : "QUESTION_POSTED",
+    actorId: userId,
+    actorEmail: session.user?.email,
+    targetType: "QAItem",
+    targetId: item.id,
+    metadata: { topicId, title },
   });
 
   revalidatePath(`/topics/${topicId}`);
@@ -28,8 +38,18 @@ export async function postQaItem(topicId: string, formData: FormData) {
 
 export async function deleteQaItem(topicId: string, qaItemId: string) {
   // Only Topic Owners or Admins can delete others' Q&A/reviews.
-  await requireRole(["TOPIC_OWNER", "ADMIN"]);
+  const session = await requireRole(["TOPIC_OWNER", "ADMIN"]);
   await prisma.qAItem.delete({ where: { id: qaItemId } });
+
+  await logActivity({
+    action: "QA_DELETED",
+    actorId: (session.user as any).id,
+    actorEmail: session.user?.email,
+    targetType: "QAItem",
+    targetId: qaItemId,
+    metadata: { topicId },
+  });
+
   revalidatePath(`/topics/${topicId}`);
 }
 
@@ -41,13 +61,33 @@ export async function postComment(blogId: string, formData: FormData) {
   const body = String(formData.get("body") || "").trim();
   if (!body) throw new Error("Comment cannot be empty");
 
-  await prisma.comment.create({ data: { blogId, authorId: userId, body } });
+  const comment = await prisma.comment.create({ data: { blogId, authorId: userId, body } });
+
+  await logActivity({
+    action: "COMMENT_POSTED",
+    actorId: userId,
+    actorEmail: session.user?.email,
+    targetType: "Comment",
+    targetId: comment.id,
+    metadata: { blogId },
+  });
+
   revalidatePath(`/blogs/${blogId}`);
 }
 
 export async function deleteComment(blogId: string, commentId: string) {
-  await requireRole(["TOPIC_OWNER", "ADMIN"]);
+  const session = await requireRole(["TOPIC_OWNER", "ADMIN"]);
   await prisma.comment.delete({ where: { id: commentId } });
+
+  await logActivity({
+    action: "COMMENT_DELETED",
+    actorId: (session.user as any).id,
+    actorEmail: session.user?.email,
+    targetType: "Comment",
+    targetId: commentId,
+    metadata: { blogId },
+  });
+
   revalidatePath(`/blogs/${blogId}`);
 }
 
@@ -64,6 +104,14 @@ export async function submitContent(formData: FormData) {
 
   if (kind === "topic") {
     const topic = await prisma.topic.create({ data: { title, description: content } });
+    await logActivity({
+      action: "TOPIC_CREATED",
+      actorId: userId,
+      actorEmail: session.user?.email,
+      targetType: "Topic",
+      targetId: topic.id,
+      metadata: { title },
+    });
     revalidatePath("/topics");
     return { redirectTo: `/topics/${topic.id}` };
   } else {
@@ -77,6 +125,14 @@ export async function submitContent(formData: FormData) {
     const blog = await prisma.blog.create({
       data: { title, body: content || "...", topicId: topic.id, authorId: userId },
     });
+    await logActivity({
+      action: "BLOG_PUBLISHED",
+      actorId: userId,
+      actorEmail: session.user?.email,
+      targetType: "Blog",
+      targetId: blog.id,
+      metadata: { title, topicId: topic.id },
+    });
     revalidatePath("/");
     return { redirectTo: `/blogs/${blog.id}` };
   }
@@ -85,7 +141,7 @@ export async function submitContent(formData: FormData) {
 // ---------- Portfolio (owner-only writes; owner = ADMIN in this v1 model) ----------
 
 export async function updateProfile(formData: FormData) {
-  await requireRole(["ADMIN"]);
+  const session = await requireRole(["ADMIN"]);
   const linkedinUrl = String(formData.get("linkedinUrl") || "").trim();
   const githubUrl = String(formData.get("githubUrl") || "").trim();
   const certifications = String(formData.get("certifications") || "").trim();
@@ -96,6 +152,14 @@ export async function updateProfile(formData: FormData) {
   } else {
     await prisma.portfolioProfile.create({ data: { linkedinUrl, githubUrl, certifications } });
   }
+
+  await logActivity({
+    action: "PROFILE_UPDATED",
+    actorId: (session.user as any).id,
+    actorEmail: session.user?.email,
+    targetType: "PortfolioProfile",
+  });
+
   revalidatePath("/portfolio");
 }
 
@@ -111,9 +175,19 @@ export async function uploadDocument(formData: FormData) {
 
   // One active file per type — replace whatever was there before.
   await prisma.portfolioDocument.deleteMany({ where: { ownerId: userId, type: docType } });
-  await prisma.portfolioDocument.create({
+  const doc = await prisma.portfolioDocument.create({
     data: { ownerId: userId, type: docType, fileUrl, fileFormat: "pdf" },
   });
+
+  await logActivity({
+    action: "DOCUMENT_UPLOADED",
+    actorId: userId,
+    actorEmail: session.user?.email,
+    targetType: "PortfolioDocument",
+    targetId: doc.id,
+    metadata: { docType },
+  });
+
   revalidatePath("/portfolio");
 }
 
@@ -137,77 +211,195 @@ export async function addProject(formData: FormData) {
     screenshotMobileUrl = await uploadJpeg(mobileFile, `projects/${stamp}-mobile.jpg`);
   }
 
-  await prisma.portfolioProject.create({
+  const project = await prisma.portfolioProject.create({
     data: { ownerId: userId, title, description, screenshotLaptopUrl, screenshotMobileUrl },
   });
+
+  await logActivity({
+    action: "PROJECT_ADDED",
+    actorId: userId,
+    actorEmail: session.user?.email,
+    targetType: "PortfolioProject",
+    targetId: project.id,
+    metadata: { title },
+  });
+
   revalidatePath("/portfolio");
 }
 
 export async function removeProject(projectId: string) {
-  await requireRole(["ADMIN"]);
+  const session = await requireRole(["ADMIN"]);
   await prisma.portfolioProject.delete({ where: { id: projectId } });
+
+  await logActivity({
+    action: "PROJECT_REMOVED",
+    actorId: (session.user as any).id,
+    actorEmail: session.user?.email,
+    targetType: "PortfolioProject",
+    targetId: projectId,
+  });
+
   revalidatePath("/portfolio");
 }
 
 export async function removeDocument(docId: string) {
-  await requireRole(["ADMIN"]);
+  const session = await requireRole(["ADMIN"]);
   await prisma.portfolioDocument.delete({ where: { id: docId } });
+
+  await logActivity({
+    action: "DOCUMENT_REMOVED",
+    actorId: (session.user as any).id,
+    actorEmail: session.user?.email,
+    targetType: "PortfolioDocument",
+    targetId: docId,
+  });
+
   revalidatePath("/portfolio");
 }
 
 // ---------- Admin moderation ----------
 
 export async function resolveReport(reportId: string, action: "APPROVED" | "REMOVED") {
-  await requireRole(["ADMIN"]);
-  const session = await requireSession();
+  const session = await requireRole(["ADMIN"]);
   await prisma.report.update({
     where: { id: reportId },
     data: { status: action, reviewedById: (session.user as any).id },
   });
+
+  await logActivity({
+    action: action === "APPROVED" ? "REPORT_APPROVED" : "REPORT_REMOVED",
+    actorId: (session.user as any).id,
+    actorEmail: session.user?.email,
+    targetType: "Report",
+    targetId: reportId,
+  });
+
   revalidatePath("/admin");
 }
 
 export async function addAdvertisement(formData: FormData) {
-  await requireRole(["ADMIN"]);
+  const session = await requireRole(["ADMIN"]);
   const imageUrl = String(formData.get("imageUrl") || "").trim() || "/placeholder-ad.jpg";
   const targetUrl = String(formData.get("targetUrl") || "").trim();
   const placement = String(formData.get("placement") || "LEADERBOARD") as any;
   if (!targetUrl) throw new Error("Target URL is required");
 
-  await prisma.advertisement.create({ data: { imageUrl, targetUrl, placement } });
+  const ad = await prisma.advertisement.create({ data: { imageUrl, targetUrl, placement } });
+
+  await logActivity({
+    action: "AD_ADDED",
+    actorId: (session.user as any).id,
+    actorEmail: session.user?.email,
+    targetType: "Advertisement",
+    targetId: ad.id,
+    metadata: { placement, targetUrl },
+  });
+
   revalidatePath("/admin");
 }
 
 export async function removeAdvertisement(adId: string) {
-  await requireRole(["ADMIN"]);
+  const session = await requireRole(["ADMIN"]);
   await prisma.advertisement.delete({ where: { id: adId } });
+
+  await logActivity({
+    action: "AD_REMOVED",
+    actorId: (session.user as any).id,
+    actorEmail: session.user?.email,
+    targetType: "Advertisement",
+    targetId: adId,
+  });
+
   revalidatePath("/admin");
 }
 
 // ---------- Roadmap ("Upcoming Updates") ----------
 
 export async function addRoadmapItem(formData: FormData) {
-  await requireRole(["ADMIN"]);
+  const session = await requireRole(["ADMIN"]);
   const title = String(formData.get("title") || "").trim();
   const notes = String(formData.get("notes") || "").trim();
   const status = String(formData.get("status") || "PLANNED") as any;
   if (!title) throw new Error("Title is required");
 
-  await prisma.roadmapItem.create({ data: { title, notes, status } });
+  const item = await prisma.roadmapItem.create({ data: { title, notes, status } });
+
+  await logActivity({
+    action: "ROADMAP_ITEM_ADDED",
+    actorId: (session.user as any).id,
+    actorEmail: session.user?.email,
+    targetType: "RoadmapItem",
+    targetId: item.id,
+    metadata: { title, status },
+  });
+
   revalidatePath("/");
   revalidatePath("/admin");
 }
 
 export async function setRoadmapStatus(itemId: string, status: "PLANNED" | "IN_PROGRESS" | "DONE") {
-  await requireRole(["ADMIN"]);
+  const session = await requireRole(["ADMIN"]);
   await prisma.roadmapItem.update({ where: { id: itemId }, data: { status } });
+
+  await logActivity({
+    action: "ROADMAP_STATUS_CHANGED",
+    actorId: (session.user as any).id,
+    actorEmail: session.user?.email,
+    targetType: "RoadmapItem",
+    targetId: itemId,
+    metadata: { status },
+  });
+
   revalidatePath("/");
   revalidatePath("/admin");
 }
 
 export async function removeRoadmapItem(itemId: string) {
-  await requireRole(["ADMIN"]);
+  const session = await requireRole(["ADMIN"]);
   await prisma.roadmapItem.delete({ where: { id: itemId } });
+
+  await logActivity({
+    action: "ROADMAP_ITEM_REMOVED",
+    actorId: (session.user as any).id,
+    actorEmail: session.user?.email,
+    targetType: "RoadmapItem",
+    targetId: itemId,
+  });
+
   revalidatePath("/");
+  revalidatePath("/admin");
+}
+
+// ---------- Audit log management ----------
+
+export async function clearAuditLogsBefore(dateStr: string) {
+  const session = await requireRole(["ADMIN"]);
+  const cutoff = new Date(dateStr);
+  if (isNaN(cutoff.getTime())) throw new Error("Invalid date");
+
+  const result = await prisma.auditLog.deleteMany({ where: { createdAt: { lt: cutoff } } });
+
+  // Logged after the fact, so this action itself remains in the trail.
+  await logActivity({
+    action: "AUDIT_LOG_CLEARED",
+    actorId: (session.user as any).id,
+    actorEmail: session.user?.email,
+    metadata: { before: dateStr, deletedCount: result.count },
+  });
+
+  revalidatePath("/admin");
+}
+
+export async function clearAllAuditLogs() {
+  const session = await requireRole(["ADMIN"]);
+  const result = await prisma.auditLog.deleteMany({});
+
+  await logActivity({
+    action: "AUDIT_LOG_CLEARED_ALL",
+    actorId: (session.user as any).id,
+    actorEmail: session.user?.email,
+    metadata: { deletedCount: result.count },
+  });
+
   revalidatePath("/admin");
 }

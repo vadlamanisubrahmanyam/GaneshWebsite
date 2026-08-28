@@ -47,6 +47,13 @@ export const authOptions: NextAuthOptions = {
       } catch (err) {
         console.error("Owner auto-promotion failed (sign-in still allowed):", err);
       }
+      try {
+        await prisma.auditLog.create({
+          data: { action: "SIGN_IN", actorId: user.id, actorEmail: user.email },
+        });
+      } catch (err) {
+        console.error("Audit log write failed (non-blocking):", err);
+      }
       return true;
     },
     // Attach id + role onto the session object so pages/components can
