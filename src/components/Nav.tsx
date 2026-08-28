@@ -16,8 +16,9 @@ export async function Nav() {
       </div>
       <nav style={{ display: "flex", gap: 16, alignItems: "center", fontSize: 13 }}>
         <Link href="/topics" style={{ color: "#dfe4f0", textDecoration: "none" }}>Topics</Link>
-        <Link href="/portfolio" style={{ color: "#dfe4f0", textDecoration: "none" }}>Subrahmanyam's Portfolio</Link>
-        <Link href="/submit" style={{ color: "#dfe4f0", textDecoration: "none" }}>Submit Topic</Link>
+        <Link href="/blogs" style={{ color: "#dfe4f0", textDecoration: "none" }}>Blogs</Link>
+        <Link href="/portfolio" style={{ color: "#dfe4f0", textDecoration: "none" }}>My Portfolio</Link>
+        <Link href="/submit" style={{ color: "#dfe4f0", textDecoration: "none" }}>+ New Post</Link>
         {role === "ADMIN" && (
           <Link href="/admin" style={{ color: "#dfe4f0", textDecoration: "none" }}>Admin</Link>
         )}

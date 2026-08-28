@@ -27,6 +27,11 @@ export default async function TopicDetailPage({ params }: { params: Promise<{ to
     orderBy: { createdAt: "desc" },
     include: { author: true },
   });
+  const topicBlogs = await prisma.blog.findMany({
+    where: { topicId: topic.id },
+    orderBy: { createdAt: "desc" },
+    include: { author: true },
+  });
 
   const postQaWithTopic = postQaItem.bind(null, topic.id);
 
@@ -66,6 +71,19 @@ export default async function TopicDetailPage({ params }: { params: Promise<{ to
             <a href={`/submit?kind=blog&category=${encodeURIComponent(topic.title)}`}>Write a blog post in {topic.title} →</a>
           </p>
         )}
+
+        <h2>Blog posts in {topic.title}</h2>
+        {topicBlogs.length === 0 && <p className="muted">No blog posts in this topic yet.</p>}
+        {topicBlogs.map((b: any) => (
+          <Link key={b.id} href={`/blogs/${b.id}`} style={{ textDecoration: "none", color: "inherit" }}>
+            <div className="card">
+              <h3>{b.title}</h3>
+              <p className="muted">by {b.author?.name ?? "Unknown"}</p>
+            </div>
+          </Link>
+        ))}
+
+        <h2>Questions &amp; Reviews</h2>
 
         {items.length === 0 && <p className="muted">No questions or reviews yet.</p>}
         {items.map((q: any) => (

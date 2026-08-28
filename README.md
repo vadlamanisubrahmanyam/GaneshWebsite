@@ -1,4 +1,4 @@
-# Circuit — CMS Website (v1 backend scaffold)
+# Subrahmanyam — CMS Website (v1 backend scaffold)
 
 Next.js 15 + NextAuth.js (Google wired up, Facebook/Microsoft ready to add) +
 Prisma + Supabase Postgres.
