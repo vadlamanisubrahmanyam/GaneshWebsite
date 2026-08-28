@@ -183,3 +183,31 @@ export async function removeAdvertisement(adId: string) {
   await prisma.advertisement.delete({ where: { id: adId } });
   revalidatePath("/admin");
 }
+
+// ---------- Roadmap ("Upcoming Updates") ----------
+
+export async function addRoadmapItem(formData: FormData) {
+  await requireRole(["ADMIN"]);
+  const title = String(formData.get("title") || "").trim();
+  const notes = String(formData.get("notes") || "").trim();
+  const status = String(formData.get("status") || "PLANNED") as any;
+  if (!title) throw new Error("Title is required");
+
+  await prisma.roadmapItem.create({ data: { title, notes, status } });
+  revalidatePath("/");
+  revalidatePath("/admin");
+}
+
+export async function setRoadmapStatus(itemId: string, status: "PLANNED" | "IN_PROGRESS" | "DONE") {
+  await requireRole(["ADMIN"]);
+  await prisma.roadmapItem.update({ where: { id: itemId }, data: { status } });
+  revalidatePath("/");
+  revalidatePath("/admin");
+}
+
+export async function removeRoadmapItem(itemId: string) {
+  await requireRole(["ADMIN"]);
+  await prisma.roadmapItem.delete({ where: { id: itemId } });
+  revalidatePath("/");
+  revalidatePath("/admin");
+}

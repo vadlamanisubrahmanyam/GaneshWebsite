@@ -45,6 +45,17 @@ async function main() {
     },
   });
 
+  await prisma.roadmapItem.createMany({
+    data: [
+      { title: "Facebook login integration", status: "PLANNED", sortOrder: 1 },
+      { title: "Microsoft login integration", status: "PLANNED", sortOrder: 2 },
+      { title: "Blog cover image uploads", status: "PLANNED", sortOrder: 3 },
+      { title: "Advertisement creative image uploads", status: "PLANNED", sortOrder: 4 },
+      { title: "Report button on content", status: "PLANNED", sortOrder: 5 },
+      { title: "Google AdSense integration", status: "PLANNED", sortOrder: 6 },
+    ],
+  });
+
   console.log("Seed complete.");
 }
 

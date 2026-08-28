@@ -214,6 +214,23 @@ model Advertisement {
   createdAt   DateTime    @default(now())
 }
 
+// ---------- Roadmap widget (admin-editable "Upcoming Updates") ----------
+
+enum RoadmapStatus {
+  PLANNED
+  IN_PROGRESS
+  DONE
+}
+
+model RoadmapItem {
+  id        String        @id @default(cuid())
+  title     String
+  notes     String?
+  status    RoadmapStatus @default(PLANNED)
+  sortOrder Int           @default(0)
+  createdAt DateTime      @default(now())
+}
+
 // ---------- Portfolio (single-owner section) ----------
 
 model PortfolioProfile {

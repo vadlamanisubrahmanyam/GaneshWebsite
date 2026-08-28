@@ -29,6 +29,11 @@ body {
 
 main { max-width: 1040px; margin: 0 auto; padding: 28px 20px 80px; }
 
+.home-grid { display: flex; justify-content: space-between; align-items: flex-start; gap: 24px; flex-wrap: wrap; }
+.home-main { flex: 1; min-width: 260px; }
+.home-aside { width: 280px; flex: none; }
+@media (max-width: 700px) { .home-aside { width: 100%; } }
+
 .btn { display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); padding: 9px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; }
 .btn.primary { background: var(--navy); color: #fff; border-color: var(--navy); }
 

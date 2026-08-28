@@ -33,6 +33,15 @@ export default async function HomePage() {
 
   const headlines = await getTopHeadlines(6);
 
+  let roadmapItems: any[] = [];
+  try {
+    roadmapItems = await prisma.roadmapItem.findMany({ orderBy: { sortOrder: "asc" }, take: 8 });
+  } catch (err) {
+    console.error(err);
+  }
+
+  const STATUS_LABEL: Record<string, string> = { PLANNED: "Planned", IN_PROGRESS: "In progress", DONE: "Done" };
+
   // Merge blogs + Q&A into one "latest activity" feed, newest first.
   const activity = [
     ...blogs.map((b: any) => ({ kind: "blog" as const, id: b.id, title: b.title, topic: b.topic, author: b.author, createdAt: b.createdAt })),
@@ -45,12 +54,49 @@ export default async function HomePage() {
     <>
       <Nav />
       <main>
-        <h1>{firstName ? `Welcome back, ${firstName}` : "Welcome to Subrahmanyam's community site"}</h1>
-        <p className="muted">
-          {session
-            ? "Here's what's new since you last checked in."
-            : "Browse topics, blogs, and my project portfolio — sign in to join the discussion."}
-        </p>
+        <div className="home-grid">
+          <div className="home-main">
+            <h1>{firstName ? `Welcome back, ${firstName}` : "Welcome to Subrahmanyam's community site"}</h1>
+            <p className="muted">
+              {session
+                ? "Here's what's new since you last checked in."
+                : "Browse topics, blogs, and my project portfolio — sign in to join the discussion."}
+            </p>
+          </div>
+
+          <aside className="home-aside">
+            <div className="card">
+              <h3 style={{ fontSize: 14, marginBottom: 8 }}>Upcoming updates</h3>
+              {roadmapItems.length === 0 && <p className="muted" style={{ fontSize: 12 }}>Nothing planned right now.</p>}
+              {roadmapItems.length > 0 && (
+                <table style={{ width: "100%", fontSize: 12, borderCollapse: "collapse" }}>
+                  <tbody>
+                    {roadmapItems.map((r: any) => (
+                      <tr key={r.id} style={{ borderTop: "1px solid var(--line)" }}>
+                        <td style={{ padding: "6px 4px 6px 0" }}>{r.title}</td>
+                        <td style={{ padding: "6px 0", textAlign: "right", whiteSpace: "nowrap" }}>
+                          <span
+                            style={{
+                              fontSize: 10,
+                              fontWeight: 700,
+                              textTransform: "uppercase",
+                              padding: "2px 6px",
+                              borderRadius: 10,
+                              background: r.status === "DONE" ? "#e6f4ea" : r.status === "IN_PROGRESS" ? "var(--gold-soft)" : "#EEF0F5",
+                              color: r.status === "DONE" ? "#1e7a34" : r.status === "IN_PROGRESS" ? "#6b5511" : "var(--muted)",
+                            }}
+                          >
+                            {STATUS_LABEL[r.status] ?? r.status}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
+          </aside>
+        </div>
 
         <h2>Top headlines</h2>
         {headlines.length === 0 && <p className="muted">Headlines unavailable right now.</p>}

@@ -1,7 +1,7 @@
 import { Nav } from "@/components/Nav";
 import { prisma } from "@/lib/prisma";
 import { getSessionOrNull } from "@/lib/guards";
-import { resolveReport, addAdvertisement, removeAdvertisement } from "@/lib/actions";
+import { resolveReport, addAdvertisement, removeAdvertisement, addRoadmapItem, setRoadmapStatus, removeRoadmapItem } from "@/lib/actions";
 
 export const dynamic = "force-dynamic";
 
@@ -18,9 +18,10 @@ export default async function AdminPage() {
     );
   }
 
-  const [reports, ads] = await Promise.all([
+  const [reports, ads, roadmapItems] = await Promise.all([
     prisma.report.findMany({ where: { status: "OPEN" }, include: { reporter: true } }),
     prisma.advertisement.findMany({ orderBy: { createdAt: "desc" } }),
+    prisma.roadmapItem.findMany({ orderBy: { sortOrder: "asc" } }),
   ]);
 
   return (
@@ -67,6 +68,41 @@ export default async function AdminPage() {
             </select>
             <p className="muted" style={{ fontSize: 11 }}>Creative image upload (JPEG) connects once Supabase Storage is wired in.</p>
             <button className="btn primary" type="submit">Add advertisement</button>
+          </form>
+        </div>
+
+        <h2>Upcoming updates (shown on the home page)</h2>
+        {roadmapItems.length === 0 && <p className="muted">No roadmap items yet.</p>}
+        {roadmapItems.map((r: any) => (
+          <div className="card" key={r.id}>
+            <b>{r.title}</b>
+            {r.notes && <p className="muted">{r.notes}</p>}
+            <div style={{ display: "flex", gap: 8, alignItems: "center", marginTop: 6 }}>
+              <form action={async (fd: FormData) => { "use server"; await setRoadmapStatus(r.id, fd.get("status") as any); }} style={{ display: "flex", gap: 6 }}>
+                <select name="status" defaultValue={r.status} style={{ padding: 6 }}>
+                  <option value="PLANNED">Planned</option>
+                  <option value="IN_PROGRESS">In progress</option>
+                  <option value="DONE">Done</option>
+                </select>
+                <button className="btn small" type="submit">Update</button>
+              </form>
+              <form action={removeRoadmapItem.bind(null, r.id)}>
+                <button className="btn small" type="submit">Delete</button>
+              </form>
+            </div>
+          </div>
+        ))}
+        <div className="card">
+          <h3>Add roadmap item</h3>
+          <form action={addRoadmapItem}>
+            <input name="title" placeholder="e.g. Microsoft login integration" style={{ width: "100%", padding: 8, marginBottom: 8 }} required />
+            <textarea name="notes" placeholder="Optional notes" rows={2} style={{ width: "100%", padding: 8, marginBottom: 8 }} />
+            <select name="status" defaultValue="PLANNED" style={{ width: "100%", padding: 8, marginBottom: 8 }}>
+              <option value="PLANNED">Planned</option>
+              <option value="IN_PROGRESS">In progress</option>
+              <option value="DONE">Done</option>
+            </select>
+            <button className="btn primary" type="submit">Add to roadmap</button>
           </form>
         </div>
       </main>
