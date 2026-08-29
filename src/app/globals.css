@@ -34,8 +34,16 @@ main { max-width: 1040px; margin: 0 auto; padding: 28px 20px 80px; }
 .home-aside { width: 280px; flex: none; }
 @media (max-width: 700px) { .home-aside { width: 100%; } }
 
+.compact-heading { margin: 16px 0 8px; font-size: 16px; }
+.scroll-box { overflow-y: auto; padding-right: 4px; }
+.compact-list .card { padding: 8px 12px; margin-bottom: 6px; line-height: 1.25; }
+.compact-list .card h3 { font-size: 14px; margin: 0 0 2px; line-height: 1.25; }
+.compact-list .card p { margin: 0; font-size: 11px; line-height: 1.3; }
+
 .btn { display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); padding: 9px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; }
 .btn.primary { background: var(--navy); color: #fff; border-color: var(--navy); }
+.btn.danger { color: #b33; border-color: #f0c9c9; }
+.btn.small { padding: 5px 10px; font-size: 12px; }
 
 .card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; margin-bottom: 12px; }
 .muted { color: var(--muted); font-size: 13px; }

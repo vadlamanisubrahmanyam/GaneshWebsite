@@ -53,6 +53,24 @@ export async function deleteQaItem(topicId: string, qaItemId: string) {
   revalidatePath(`/topics/${topicId}`);
 }
 
+export async function deleteTopic(topicId: string) {
+  const session = await requireRole(["ADMIN"]);
+  const topic = await prisma.topic.findUnique({ where: { id: topicId } });
+  await prisma.topic.delete({ where: { id: topicId } }); // cascades to Blog, QAItem, TopicMembership per schema
+
+  await logActivity({
+    action: "TOPIC_DELETED",
+    actorId: (session.user as any).id,
+    actorEmail: session.user?.email,
+    targetType: "Topic",
+    targetId: topicId,
+    metadata: { title: topic?.title },
+  });
+
+  revalidatePath("/topics");
+  revalidatePath("/");
+}
+
 // ---------- Blog comments ----------
 
 export async function postComment(blogId: string, formData: FormData) {
@@ -320,9 +338,11 @@ export async function addRoadmapItem(formData: FormData) {
   const title = String(formData.get("title") || "").trim();
   const notes = String(formData.get("notes") || "").trim();
   const status = String(formData.get("status") || "PLANNED") as any;
+  const targetDateStr = String(formData.get("targetDate") || "").trim();
+  const targetDate = targetDateStr ? new Date(targetDateStr) : null;
   if (!title) throw new Error("Title is required");
 
-  const item = await prisma.roadmapItem.create({ data: { title, notes, status } });
+  const item = await prisma.roadmapItem.create({ data: { title, notes, status, targetDate } });
 
   await logActivity({
     action: "ROADMAP_ITEM_ADDED",

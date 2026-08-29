@@ -1,10 +1,15 @@
 import Link from "next/link";
 import { Nav } from "@/components/Nav";
 import { prisma } from "@/lib/prisma";
+import { getSessionOrNull } from "@/lib/guards";
+import { deleteTopic } from "@/lib/actions";
 
 export const dynamic = "force-dynamic";
 
 export default async function TopicsPage() {
+  const session = await getSessionOrNull();
+  const isAdmin = (session?.user as any)?.role === "ADMIN";
+
   let topics: Awaited<ReturnType<typeof prisma.topic.findMany>> = [];
   try {
     topics = await prisma.topic.findMany({ orderBy: { createdAt: "desc" } });
@@ -26,13 +31,18 @@ export default async function TopicsPage() {
 
         {topics.length === 0 && <p className="muted">No topics yet. Sign in and use Submit to create the first one.</p>}
         {topics.map((t: any) => (
-          <Link key={t.id} href={`/topics/${t.id}`} style={{ textDecoration: "none", color: "inherit" }}>
-            <div className="card">
+          <div className="card" key={t.id}>
+            <Link href={`/topics/${t.id}`} style={{ textDecoration: "none", color: "inherit" }}>
               <h3>{t.title}</h3>
               <p className="muted">{t.description}</p>
               <p className="muted">{t.followerCount} followers</p>
-            </div>
-          </Link>
+            </Link>
+            {isAdmin && (
+              <form action={deleteTopic.bind(null, t.id)} style={{ marginTop: 8 }}>
+                <button className="btn small danger" type="submit">Delete topic</button>
+              </form>
+            )}
+          </div>
         ))}
       </main>
     </>

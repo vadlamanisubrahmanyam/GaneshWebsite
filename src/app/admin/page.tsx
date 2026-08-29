@@ -74,31 +74,36 @@ export default async function AdminPage() {
         </div>
 
         <h2>Upcoming updates (shown on the home page)</h2>
-        {roadmapItems.length === 0 && <p className="muted">No roadmap items yet.</p>}
-        {roadmapItems.map((r: any) => (
-          <div className="card" key={r.id}>
-            <b>{r.title}</b>
-            {r.notes && <p className="muted">{r.notes}</p>}
-            <div style={{ display: "flex", gap: 8, alignItems: "center", marginTop: 6 }}>
-              <form action={async (fd: FormData) => { "use server"; await setRoadmapStatus(r.id, fd.get("status") as any); }} style={{ display: "flex", gap: 6 }}>
-                <select name="status" defaultValue={r.status} style={{ padding: 6 }}>
-                  <option value="PLANNED">Planned</option>
-                  <option value="IN_PROGRESS">In progress</option>
-                  <option value="DONE">Done</option>
-                </select>
-                <button className="btn small" type="submit">Update</button>
-              </form>
-              <form action={removeRoadmapItem.bind(null, r.id)}>
-                <button className="btn small" type="submit">Delete</button>
-              </form>
+        <div className="scroll-box" style={{ maxHeight: 320 }}>
+          {roadmapItems.length === 0 && <p className="muted">No roadmap items yet.</p>}
+          {roadmapItems.map((r: any) => (
+            <div className="card" key={r.id}>
+              <b>{r.title}</b>
+              {r.targetDate && <span className="muted" style={{ fontSize: 11, marginLeft: 8 }}>Target: {new Date(r.targetDate).toLocaleDateString()}</span>}
+              {r.notes && <p className="muted">{r.notes}</p>}
+              <div style={{ display: "flex", gap: 8, alignItems: "center", marginTop: 6 }}>
+                <form action={async (fd: FormData) => { "use server"; await setRoadmapStatus(r.id, fd.get("status") as any); }} style={{ display: "flex", gap: 6 }}>
+                  <select name="status" defaultValue={r.status} style={{ padding: 6 }}>
+                    <option value="PLANNED">Planned</option>
+                    <option value="IN_PROGRESS">In progress</option>
+                    <option value="DONE">Done</option>
+                  </select>
+                  <button className="btn small" type="submit">Update</button>
+                </form>
+                <form action={removeRoadmapItem.bind(null, r.id)}>
+                  <button className="btn small" type="submit">Delete</button>
+                </form>
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
         <div className="card">
           <h3>Add roadmap item</h3>
           <form action={addRoadmapItem}>
             <input name="title" placeholder="e.g. Microsoft login integration" style={{ width: "100%", padding: 8, marginBottom: 8 }} required />
             <textarea name="notes" placeholder="Optional notes" rows={2} style={{ width: "100%", padding: 8, marginBottom: 8 }} />
+            <label className="muted" style={{ fontSize: 11 }}>Target date (optional)</label>
+            <input type="date" name="targetDate" style={{ width: "100%", padding: 8, margin: "4px 0 8px" }} />
             <select name="status" defaultValue="PLANNED" style={{ width: "100%", padding: 8, marginBottom: 8 }}>
               <option value="PLANNED">Planned</option>
               <option value="IN_PROGRESS">In progress</option>

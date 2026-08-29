@@ -236,12 +236,13 @@ enum RoadmapStatus {
 }
 
 model RoadmapItem {
-  id        String        @id @default(cuid())
-  title     String
-  notes     String?
-  status    RoadmapStatus @default(PLANNED)
-  sortOrder Int           @default(0)
-  createdAt DateTime      @default(now())
+  id         String        @id @default(cuid())
+  title      String
+  notes      String?
+  status     RoadmapStatus @default(PLANNED)
+  targetDate DateTime?
+  sortOrder  Int           @default(0)
+  createdAt  DateTime      @default(now())
 }
 
 // ---------- Portfolio (single-owner section) ----------

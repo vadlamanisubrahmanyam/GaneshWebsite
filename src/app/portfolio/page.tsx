@@ -2,6 +2,7 @@ import { Nav } from "@/components/Nav";
 import { prisma } from "@/lib/prisma";
 import { getSessionOrNull } from "@/lib/guards";
 import { updateProfile, addProject, removeProject, removeDocument, uploadDocument } from "@/lib/actions";
+import { DocumentUploadForm, ProjectUploadForm } from "@/components/FileUploadForms";
 
 export const dynamic = "force-dynamic";
 
@@ -65,16 +66,7 @@ export default async function PortfolioPage() {
         {isOwner && (
           <div className="card">
             <h3>Upload document</h3>
-            <form action={uploadDocument}>
-              <select name="docType" defaultValue="RESUME" style={{ width: "100%", padding: 8, marginBottom: 8 }}>
-                <option value="RESUME">Resume</option>
-                <option value="COVER_LETTER">Cover Letter</option>
-                <option value="PORTFOLIO">Project Portfolio</option>
-              </select>
-              <input type="file" name="file" accept="application/pdf" required style={{ marginBottom: 8, display: "block" }} />
-              <p className="muted" style={{ fontSize: 11 }}>PDF only, max 10MB. Uploading replaces the existing file of the same type.</p>
-              <button className="btn primary" type="submit">Upload</button>
-            </form>
+            <DocumentUploadForm action={uploadDocument} />
           </div>
         )}
 
@@ -107,15 +99,7 @@ export default async function PortfolioPage() {
         {isOwner && (
           <div className="card">
             <h3>Add new project</h3>
-            <form action={addProject}>
-              <input name="title" placeholder="Project title" style={{ width: "100%", padding: 8, marginBottom: 8 }} required />
-              <textarea name="description" placeholder="Short description" rows={2} style={{ width: "100%", padding: 8, marginBottom: 8 }} />
-              <label className="muted" style={{ fontSize: 11 }}>Screenshot — laptop (JPEG)</label>
-              <input type="file" name="screenshotLaptop" accept="image/jpeg" style={{ display: "block", marginBottom: 8 }} />
-              <label className="muted" style={{ fontSize: 11 }}>Screenshot — mobile (JPEG)</label>
-              <input type="file" name="screenshotMobile" accept="image/jpeg" style={{ display: "block", marginBottom: 8 }} />
-              <button className="btn primary" type="submit">Add project</button>
-            </form>
+            <ProjectUploadForm action={addProject} />
           </div>
         )}
       </main>

@@ -1,8 +1,9 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { Nav } from "@/components/Nav";
 import { prisma } from "@/lib/prisma";
 import { getSessionOrNull } from "@/lib/guards";
-import { postQaItem, deleteQaItem } from "@/lib/actions";
+import { postQaItem, deleteQaItem, deleteTopic } from "@/lib/actions";
 
 export const dynamic = "force-dynamic";
 
@@ -40,8 +41,23 @@ export default async function TopicDetailPage({ params }: { params: Promise<{ to
       <Nav />
       <main>
         <p className="muted"><Link href="/topics">← All topics</Link></p>
-        <h1>{topic.title}</h1>
-        <p className="muted">{topic.description} · {topic.followerCount} followers</p>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+          <div>
+            <h1>{topic.title}</h1>
+            <p className="muted">{topic.description} · {topic.followerCount} followers</p>
+          </div>
+          {role === "ADMIN" && (
+            <form
+              action={async () => {
+                "use server";
+                await deleteTopic(topic.id);
+                redirect("/topics");
+              }}
+            >
+              <button className="btn small danger" type="submit">Delete topic</button>
+            </form>
+          )}
+        </div>
 
         <div className="card">
           <h3>{session ? "Ask a question or post a review" : "Sign in to ask a question or post a review"}</h3>

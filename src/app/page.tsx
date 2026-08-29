@@ -35,7 +35,7 @@ export default async function HomePage() {
 
   let roadmapItems: any[] = [];
   try {
-    roadmapItems = await prisma.roadmapItem.findMany({ orderBy: { sortOrder: "asc" }, take: 8 });
+    roadmapItems = await prisma.roadmapItem.findMany({ orderBy: { sortOrder: "asc" }, take: 12 });
   } catch (err) {
     console.error(err);
   }
@@ -69,76 +69,91 @@ export default async function HomePage() {
               <h3 style={{ fontSize: 14, marginBottom: 8 }}>Upcoming updates</h3>
               {roadmapItems.length === 0 && <p className="muted" style={{ fontSize: 12 }}>Nothing planned right now.</p>}
               {roadmapItems.length > 0 && (
-                <table style={{ width: "100%", fontSize: 12, borderCollapse: "collapse" }}>
-                  <tbody>
-                    {roadmapItems.map((r: any) => (
-                      <tr key={r.id} style={{ borderTop: "1px solid var(--line)" }}>
-                        <td style={{ padding: "6px 4px 6px 0" }}>{r.title}</td>
-                        <td style={{ padding: "6px 0", textAlign: "right", whiteSpace: "nowrap" }}>
-                          <span
-                            style={{
-                              fontSize: 10,
-                              fontWeight: 700,
-                              textTransform: "uppercase",
-                              padding: "2px 6px",
-                              borderRadius: 10,
-                              background: r.status === "DONE" ? "#e6f4ea" : r.status === "IN_PROGRESS" ? "var(--gold-soft)" : "#EEF0F5",
-                              color: r.status === "DONE" ? "#1e7a34" : r.status === "IN_PROGRESS" ? "#6b5511" : "var(--muted)",
-                            }}
-                          >
-                            {STATUS_LABEL[r.status] ?? r.status}
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                <div className="scroll-box" style={{ maxHeight: 220 }}>
+                  <table style={{ width: "100%", fontSize: 12, borderCollapse: "collapse" }}>
+                    <tbody>
+                      {roadmapItems.map((r: any) => (
+                        <tr key={r.id} style={{ borderTop: "1px solid var(--line)" }}>
+                          <td style={{ padding: "5px 4px 5px 0" }}>
+                            {r.title}
+                            {r.targetDate && (
+                              <div className="muted" style={{ fontSize: 10 }}>
+                                {new Date(r.targetDate).toLocaleDateString()}
+                              </div>
+                            )}
+                          </td>
+                          <td style={{ padding: "5px 0", textAlign: "right", whiteSpace: "nowrap", verticalAlign: "top" }}>
+                            <span
+                              style={{
+                                fontSize: 10,
+                                fontWeight: 700,
+                                textTransform: "uppercase",
+                                padding: "2px 6px",
+                                borderRadius: 10,
+                                background: r.status === "DONE" ? "#e6f4ea" : r.status === "IN_PROGRESS" ? "var(--gold-soft)" : "#EEF0F5",
+                                color: r.status === "DONE" ? "#1e7a34" : r.status === "IN_PROGRESS" ? "#6b5511" : "var(--muted)",
+                              }}
+                            >
+                              {STATUS_LABEL[r.status] ?? r.status}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               )}
             </div>
           </aside>
         </div>
 
-        <h2>Top headlines</h2>
-        {headlines.length === 0 && <p className="muted">Headlines unavailable right now.</p>}
-        {headlines.map((h, i) => (
-          <a key={i} href={h.link} target="_blank" rel="noreferrer" style={{ textDecoration: "none", color: "inherit" }}>
-            <div className="card">
-              <h3 style={{ fontSize: 16 }}>{h.title}</h3>
-              {h.source && <p className="muted">{h.source}</p>}
-            </div>
-          </a>
-        ))}
+        <h2 className="compact-heading">Top headlines</h2>
+        <div className="scroll-box compact-list" style={{ maxHeight: 260 }}>
+          {headlines.length === 0 && <p className="muted">Headlines unavailable right now.</p>}
+          {headlines.map((h, i) => (
+            <a key={i} href={h.link} target="_blank" rel="noreferrer" style={{ textDecoration: "none", color: "inherit" }}>
+              <div className="card">
+                <h3>{h.title}</h3>
+                {h.source && <p className="muted">{h.source}</p>}
+              </div>
+            </a>
+          ))}
+        </div>
 
-        <h2>Latest activity</h2>
-        {activity.length === 0 && <p className="muted">Nothing posted yet — be the first.</p>}
-        {activity.map((item) => (
-          <Link
-            key={`${item.kind}-${item.id}`}
-            href={item.kind === "blog" ? `/blogs/${item.id}` : `/topics/${item.topic?.id}`}
-            style={{ textDecoration: "none", color: "inherit" }}
-          >
-            <div className="card">
-              <span className="muted" style={{ fontSize: 11, textTransform: "uppercase" }}>
-                {item.kind === "blog" ? "Blog post" : item.qaType === "REVIEW" ? "Review" : "Question"}
-              </span>
-              <h3 style={{ margin: "4px 0" }}>{item.title}</h3>
-              <p className="muted">by {item.author?.name ?? "Unknown"} · Topic: {item.topic?.title}</p>
-            </div>
-          </Link>
-        ))}
+        <h2 className="compact-heading">Latest activity</h2>
+        <div className="scroll-box compact-list" style={{ maxHeight: 260 }}>
+          {activity.length === 0 && <p className="muted">Nothing posted yet — be the first.</p>}
+          {activity.map((item) => (
+            <Link
+              key={`${item.kind}-${item.id}`}
+              href={item.kind === "blog" ? `/blogs/${item.id}` : `/topics/${item.topic?.id}`}
+              style={{ textDecoration: "none", color: "inherit" }}
+            >
+              <div className="card">
+                <span className="muted" style={{ fontSize: 10, textTransform: "uppercase" }}>
+                  {item.kind === "blog" ? "Blog post" : item.qaType === "REVIEW" ? "Review" : "Question"}
+                </span>
+                <h3>{item.title}</h3>
+                <p className="muted">by {item.author?.name ?? "Unknown"} · Topic: {item.topic?.title}</p>
+              </div>
+            </Link>
+          ))}
+        </div>
 
-        <h2>Trending topics</h2>
-        {topics.length === 0 && <p className="muted">No topics yet — create one via + New Post.</p>}
-        {topics.map((t: any) => (
-          <Link key={t.id} href={`/topics/${t.id}`} style={{ textDecoration: "none", color: "inherit" }}>
-            <div className="card">
-              <h3>{t.title}</h3>
-              <p className="muted">{t.description}</p>
-            </div>
-          </Link>
-        ))}
+        <h2 className="compact-heading">Trending topics</h2>
+        <div className="scroll-box compact-list" style={{ maxHeight: 260 }}>
+          {topics.length === 0 && <p className="muted">No topics yet — create one via + New Post.</p>}
+          {topics.map((t: any) => (
+            <Link key={t.id} href={`/topics/${t.id}`} style={{ textDecoration: "none", color: "inherit" }}>
+              <div className="card">
+                <h3>{t.title}</h3>
+                <p className="muted">{t.description}</p>
+              </div>
+            </Link>
+          ))}
+        </div>
 
-        <p className="muted" style={{ marginTop: 20 }}>
+        <p className="muted" style={{ marginTop: 16 }}>
           <Link href="/blogs">Browse all blogs →</Link> &nbsp;·&nbsp; <Link href="/topics">Browse all topics →</Link>
         </p>
       </main>
