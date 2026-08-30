@@ -1,8 +1,9 @@
 import { Nav } from "@/components/Nav";
 import { prisma } from "@/lib/prisma";
 import { getSessionOrNull } from "@/lib/guards";
-import { updateProfile, addProject, removeProject, removeDocument, uploadDocument } from "@/lib/actions";
+import { updateProfile, addProject, updateProject, removeProject, removeDocument, uploadDocument } from "@/lib/actions";
 import { DocumentUploadForm, ProjectUploadForm } from "@/components/FileUploadForms";
+import { ProjectEditor } from "@/components/ProjectEditor";
 
 export const dynamic = "force-dynamic";
 
@@ -26,7 +27,7 @@ export default async function PortfolioPage() {
     <>
       <Nav />
       <main>
-        <h1>My Portfolio</h1>
+        <h1>Subrahmanyam's Portfolio</h1>
         <p className="muted">
           {isOwner
             ? "Owner view — you can edit everything below."
@@ -89,9 +90,11 @@ export default async function PortfolioPage() {
               )}
             </div>
             {isOwner && (
-              <form action={removeProject.bind(null, p.id)} style={{ marginTop: 8 }}>
-                <button className="btn" type="submit">Delete</button>
-              </form>
+              <ProjectEditor
+                project={{ id: p.id, title: p.title, description: p.description }}
+                updateAction={updateProject.bind(null, p.id)}
+                removeAction={removeProject.bind(null, p.id)}
+              />
             )}
           </div>
         ))}

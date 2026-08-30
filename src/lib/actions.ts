@@ -245,6 +245,40 @@ export async function addProject(formData: FormData) {
   revalidatePath("/portfolio");
 }
 
+export async function updateProject(projectId: string, formData: FormData) {
+  const session = await requireRole(["ADMIN"]);
+  const title = String(formData.get("title") || "").trim();
+  const description = String(formData.get("description") || "").trim();
+  if (!title) throw new Error("Title is required");
+
+  const laptopFile = formData.get("screenshotLaptop") as File | null;
+  const mobileFile = formData.get("screenshotMobile") as File | null;
+  const stamp = Date.now();
+
+  const data: any = { title, description };
+  // Only replace a screenshot if a new file was actually chosen — otherwise
+  // the existing image stays untouched.
+  if (laptopFile && laptopFile.size > 0) {
+    data.screenshotLaptopUrl = await uploadJpeg(laptopFile, `projects/${stamp}-laptop.jpg`);
+  }
+  if (mobileFile && mobileFile.size > 0) {
+    data.screenshotMobileUrl = await uploadJpeg(mobileFile, `projects/${stamp}-mobile.jpg`);
+  }
+
+  await prisma.portfolioProject.update({ where: { id: projectId }, data });
+
+  await logActivity({
+    action: "PROJECT_UPDATED",
+    actorId: (session.user as any).id,
+    actorEmail: session.user?.email,
+    targetType: "PortfolioProject",
+    targetId: projectId,
+    metadata: { title },
+  });
+
+  revalidatePath("/portfolio");
+}
+
 export async function removeProject(projectId: string) {
   const session = await requireRole(["ADMIN"]);
   await prisma.portfolioProject.delete({ where: { id: projectId } });

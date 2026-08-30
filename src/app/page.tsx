@@ -65,11 +65,11 @@ export default async function HomePage() {
           </div>
 
           <aside className="home-aside">
-            <div className="card">
+            <div className="card home-aside-sticky">
               <h3 style={{ fontSize: 14, marginBottom: 8 }}>Upcoming updates</h3>
               {roadmapItems.length === 0 && <p className="muted" style={{ fontSize: 12 }}>Nothing planned right now.</p>}
               {roadmapItems.length > 0 && (
-                <div className="scroll-box" style={{ maxHeight: 220 }}>
+                <div className="scroll-box" style={{ maxHeight: 320 }}>
                   <table style={{ width: "100%", fontSize: 12, borderCollapse: "collapse" }}>
                     <tbody>
                       {roadmapItems.map((r: any) => (
