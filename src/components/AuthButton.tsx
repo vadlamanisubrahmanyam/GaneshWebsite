@@ -16,13 +16,8 @@ export function AuthButton() {
   }
 
   return (
-    <div style={{ display: "flex", gap: 8 }}>
-      <button className="btn primary" onClick={() => signIn("google")}>
-        Continue with Google
-      </button>
-      <button className="btn primary" onClick={() => signIn("azure-ad")}>
-        Continue with Microsoft
-      </button>
-    </div>
+    <button className="btn primary" onClick={() => signIn("google")}>
+      Continue with Google
+    </button>
   );
 }

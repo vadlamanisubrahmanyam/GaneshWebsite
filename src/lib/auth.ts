@@ -1,7 +1,7 @@
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import type { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
-import AzureADProvider from "next-auth/providers/azure-ad";
+// import AzureADProvider from "next-auth/providers/azure-ad"; // Microsoft — being finished on a feature branch
 // import FacebookProvider from "next-auth/providers/facebook"; // add when ready
 import { prisma } from "@/lib/prisma";
 
@@ -13,11 +13,12 @@ export const authOptions: NextAuthOptions = {
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
     }),
 
-    AzureADProvider({
-      clientId: process.env.MICROSOFT_CLIENT_ID!,
-      clientSecret: process.env.MICROSOFT_CLIENT_SECRET!,
-      tenantId: "common", // allows personal + org Microsoft accounts
-    }),
+    // Uncomment once Microsoft OAuth is confirmed working (see feature branch):
+    // AzureADProvider({
+    //   clientId: process.env.MICROSOFT_CLIENT_ID!,
+    //   clientSecret: process.env.MICROSOFT_CLIENT_SECRET!,
+    //   tenantId: "common", // allows personal + org Microsoft accounts
+    // }),
 
     // Uncomment once you have Facebook app credentials:
     // FacebookProvider({
